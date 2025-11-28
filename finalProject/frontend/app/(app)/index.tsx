@@ -1,11 +1,11 @@
 import { View, StyleSheet } from 'react-native';
-import { Text, Button, Card } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
+import { Button, Card, Text } from 'react-native-paper';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logoutUser } from '../../store/slices/authSlice';
 
 export default function DashboardScreen() {
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logoutUser());

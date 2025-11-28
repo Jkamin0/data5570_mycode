@@ -1,20 +1,29 @@
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Button, Text, Surface, HelperText } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, clearError } from '../../store/slices/authSlice';
+import { Button, HelperText, Surface, Text, TextInput } from 'react-native-paper';
 import { useRouter } from 'expo-router';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { clearError, loginUser } from '../../store/slices/authSlice';
+import { errorToMessage } from '../../utils/error';
+
+type LoginForm = {
+  username: string;
+  password: string;
+};
+
+type ValidationErrors = Partial<Record<keyof LoginForm, string>>;
 
 export default function LoginScreen() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const router = useRouter();
-  const { loading, error } = useSelector((state) => state.auth);
-  const [formData, setFormData] = useState({ username: '', password: '' });
-  const [validationErrors, setValidationErrors] = useState({});
+  const { loading, error } = useAppSelector((state) => state.auth);
+  const [formData, setFormData] = useState<LoginForm>({ username: '', password: '' });
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [showPassword, setShowPassword] = useState(false);
+  const errorMessage = errorToMessage(error);
 
   const handleLogin = async () => {
-    const errors = {};
+    const errors: ValidationErrors = {};
     if (!formData.username.trim()) errors.username = 'Username is required';
     if (!formData.password) errors.password = 'Password is required';
 
@@ -67,9 +76,9 @@ export default function LoginScreen() {
           <HelperText type="error">{validationErrors.password}</HelperText>
         )}
 
-        {error && (
+        {errorMessage && (
           <Text style={styles.error}>
-            {typeof error === 'string' ? error : error.detail || 'Login failed'}
+            {errorMessage}
           </Text>
         )}
 

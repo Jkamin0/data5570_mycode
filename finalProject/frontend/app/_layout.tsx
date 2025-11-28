@@ -1,21 +1,21 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider as ReduxProvider } from 'react-redux';
-import store from '../store';
-import { checkAuthStatus } from '../store/slices/authSlice';
 import LoadingScreen from '../components/LoadingScreen';
+import store from '../store';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { checkAuthStatus } from '../store/slices/authSlice';
 
 function RootLayoutNav() {
-  const dispatch = useDispatch();
-  const { isAuthenticated, initialCheckDone } = useSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, initialCheckDone } = useAppSelector((state) => state.auth);
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     dispatch(checkAuthStatus());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (!initialCheckDone) return;
@@ -27,7 +27,7 @@ function RootLayoutNav() {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/(app)');
     }
-  }, [isAuthenticated, initialCheckDone, segments]);
+  }, [isAuthenticated, initialCheckDone, segments, router]);
 
   if (!initialCheckDone) {
     return <LoadingScreen />;

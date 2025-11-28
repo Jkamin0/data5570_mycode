@@ -1,26 +1,42 @@
 import { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { TextInput, Button, Text, Surface, HelperText } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
-import { registerUser, clearError } from '../../store/slices/authSlice';
+import { ScrollView, StyleSheet } from 'react-native';
+import { Button, HelperText, Surface, Text, TextInput } from 'react-native-paper';
 import { useRouter } from 'expo-router';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { clearError, registerUser } from '../../store/slices/authSlice';
+import type { RegisterPayload } from '../../types/models';
+import { errorToMessage } from '../../utils/error';
+
+type ValidationErrors = Partial<Record<keyof RegisterPayload, string>>;
 
 export default function RegisterScreen() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const router = useRouter();
-  const { loading, error } = useSelector((state) => state.auth);
-  const [formData, setFormData] = useState({
+  const { loading, error } = useAppSelector((state) => state.auth);
+  const [formData, setFormData] = useState<RegisterPayload>({
     username: '',
     email: '',
     password: '',
     password_confirm: '',
   });
-  const [validationErrors, setValidationErrors] = useState({});
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const errorRecord =
+    typeof error === 'object' && error !== null ? (error as Record<string, unknown>) : null;
+  const detailMessage =
+    typeof errorRecord?.['detail'] === 'string' ? (errorRecord['detail'] as string) : null;
+  const nonFieldRaw = errorRecord?.['non_field_errors'];
+  const nonFieldMessage =
+    Array.isArray(nonFieldRaw) && nonFieldRaw.every((item) => typeof item === 'string')
+      ? (nonFieldRaw as string[]).join(', ')
+      : typeof nonFieldRaw === 'string'
+        ? nonFieldRaw
+        : null;
+  const generalError = errorToMessage(error);
 
   const validateForm = () => {
-    const errors = {};
+    const errors: ValidationErrors = {};
 
     if (!formData.username.trim()) {
       errors.username = 'Username is required';
@@ -67,7 +83,9 @@ export default function RegisterScreen() {
           username: Array.isArray(errors.username) ? errors.username[0] : errors.username,
           email: Array.isArray(errors.email) ? errors.email[0] : errors.email,
           password: Array.isArray(errors.password) ? errors.password[0] : errors.password,
-          password_confirm: Array.isArray(errors.password_confirm) ? errors.password_confirm[0] : errors.password_confirm,
+          password_confirm: Array.isArray(errors.password_confirm)
+            ? errors.password_confirm[0]
+            : errors.password_confirm,
         });
       }
     }
@@ -143,18 +161,14 @@ export default function RegisterScreen() {
           <HelperText type="error">{validationErrors.password_confirm}</HelperText>
         )}
 
-        {error && typeof error === 'string' && (
-          <Text style={styles.error}>{error}</Text>
+        {generalError && (
+          <Text style={styles.error}>{generalError}</Text>
         )}
-        {error && typeof error === 'object' && error.detail && (
-          <Text style={styles.error}>{error.detail}</Text>
+        {detailMessage && detailMessage !== generalError && (
+          <Text style={styles.error}>{detailMessage}</Text>
         )}
-        {error && typeof error === 'object' && error.non_field_errors && (
-          <Text style={styles.error}>
-            {Array.isArray(error.non_field_errors)
-              ? error.non_field_errors.join(', ')
-              : error.non_field_errors}
-          </Text>
+        {nonFieldMessage && nonFieldMessage !== generalError && (
+          <Text style={styles.error}>{nonFieldMessage}</Text>
         )}
 
         <Button
