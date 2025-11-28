@@ -5,6 +5,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'budgetapp.settings')
 django.setup()
 
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from budget.models import Account
 
@@ -16,12 +17,16 @@ if not user:
     user = User.objects.create_user(username='testuser', password='testpass123')
     print(f"✓ Created test user: {user.username}")
 else:
+    user.set_password('testpass123')
+    user.save()
     print(f"✓ Using existing test user: {user.username}")
 
 Account.objects.filter(user=user).delete()
 
 client = APIClient()
-client.force_authenticate(user=user)
+
+refresh = RefreshToken.for_user(user)
+client.credentials(HTTP_AUTHORIZATION=f'Bearer {str(refresh.access_token)}')
 
 print("\n1. Testing CREATE Account (POST /api/accounts/)")
 response = client.post('/api/accounts/', {

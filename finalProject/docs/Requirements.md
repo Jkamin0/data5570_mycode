@@ -142,9 +142,9 @@ As a user, I need to assign funds from my accounts into specific budget categori
 
 ### **Priority 2 – Frontend Setup & Core UI Screens**
 
-#### **US06 – Create React + Redux + Expo Project**
+#### **US06 – Create React + Redux + Expo Project** ✓
 
-**Story:**  
+**Story:**
 As a developer, I need the frontend project created so I can start building UI screens.
 
 **Tasks:**
@@ -153,18 +153,22 @@ As a developer, I need the frontend project created so I can start building UI s
 - Install React + Redux
 - Set up basic file structure
 
+**Status: COMPLETE**
+
 ---
 
-#### **US07 – Redux Store Setup**
+#### **US07 – Redux Store Setup** ✓
 
-**Story:**  
+**Story:**
 As a developer, I need application state stored in Redux so data can be shared across the app.
 
 **Acceptance Criteria:**
 
 - Store initialized
-- Slices/modules for accounts, categories, and transactions
+- Slices/modules for accounts, categories, allocations, and transactions
 - Thunks for API calls
+
+**Status: COMPLETE**
 
 ---
 
