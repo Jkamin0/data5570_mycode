@@ -1,7 +1,9 @@
+from decimal import Decimal
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
+from django.db.models import Sum
 from .models import Account, Category, BudgetAllocation, Transaction
 
 
@@ -33,8 +35,17 @@ class BudgetAllocationSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'allocated_at']
 
     def validate(self, data):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        category = data.get('category')
         account = data.get('account')
         amount = data.get('amount')
+
+        if user:
+            if account and account.user != user:
+                raise serializers.ValidationError("Account does not belong to the authenticated user.")
+            if category and category.user != user:
+                raise serializers.ValidationError("Category does not belong to the authenticated user.")
 
         if amount <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
@@ -59,10 +70,47 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date']
 
     def validate(self, data):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        account = data.get('account')
+        category = data.get('category')
+        transaction_type = data.get('transaction_type')
         amount = data.get('amount')
+
+        if account is None:
+            raise serializers.ValidationError("Account is required.")
+
+        if user and account.user != user:
+            raise serializers.ValidationError("Account does not belong to the authenticated user.")
 
         if amount <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
+
+        if transaction_type == 'expense':
+            if category is None:
+                raise serializers.ValidationError("Category is required for expenses.")
+
+            if user and category.user != user:
+                raise serializers.ValidationError("Category does not belong to the authenticated user.")
+
+            allocated = BudgetAllocation.objects.filter(
+                category=category,
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+            spent = Transaction.objects.filter(
+                category=category,
+                transaction_type='expense'
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+            available = allocated - spent
+            if amount > available:
+                available_display = format(available, '.2f')
+                amount_display = format(amount, '.2f')
+                raise serializers.ValidationError(
+                    f"Insufficient available funds in category. Available: ${available_display}, Requested: ${amount_display}"
+                )
+        elif transaction_type == 'income' and category is not None and user and category.user != user:
+            raise serializers.ValidationError("Category does not belong to the authenticated user.")
 
         return data
 

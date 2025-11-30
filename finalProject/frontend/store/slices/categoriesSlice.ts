@@ -3,6 +3,7 @@ import { categoriesAPI } from '../../services/api';
 import type {
   ApiError,
   Category,
+  CategoryBalance,
   CreateCategoryPayload,
   UpdateCategoryPayload,
 } from '../../types/models';
@@ -10,13 +11,17 @@ import { extractError } from '../../utils/error';
 
 interface CategoriesState {
   items: Category[];
+  balances: CategoryBalance[];
   loading: boolean;
+  balancesLoading: boolean;
   error: ApiError;
 }
 
 const initialState: CategoriesState = {
   items: [],
+  balances: [],
   loading: false,
+  balancesLoading: false,
   error: null,
 };
 
@@ -31,6 +36,19 @@ export const fetchCategories = createAsyncThunk<Category[], void, { rejectValue:
     }
   },
 );
+
+export const fetchCategoryBalances = createAsyncThunk<
+  CategoryBalance[],
+  void,
+  { rejectValue: ApiError }
+>('categories/fetchBalances', async (_, { rejectWithValue }) => {
+  try {
+    const response = await categoriesAPI.getBalances();
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
 
 export const createCategory = createAsyncThunk<
   Category,
@@ -117,6 +135,21 @@ const categoriesSlice = createSlice({
         state.items = state.items.filter((item) => item.id !== action.payload);
       })
       .addCase(deleteCategory.rejected, (state, action) => {
+        state.error = action.payload ?? null;
+      })
+      .addCase(fetchCategoryBalances.pending, (state) => {
+        state.balancesLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchCategoryBalances.fulfilled,
+        (state, action: PayloadAction<CategoryBalance[]>) => {
+          state.balancesLoading = false;
+          state.balances = action.payload;
+        },
+      )
+      .addCase(fetchCategoryBalances.rejected, (state, action) => {
+        state.balancesLoading = false;
         state.error = action.payload ?? null;
       });
   },

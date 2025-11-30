@@ -36,6 +36,15 @@ export default function AppLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="transactions"
+        options={{
+          title: 'Transactions',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="receipt" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

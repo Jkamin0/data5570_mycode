@@ -7,7 +7,7 @@ django.setup()
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
-from budget.models import Account, Category, Transaction
+from budget.models import Account, Category, Transaction, BudgetAllocation
 
 print("Testing Transaction REST API Endpoints...")
 print("-" * 50)
@@ -37,6 +37,9 @@ print(f"✓ Created account: {account.name} with balance ${account.balance}")
 category1 = Category.objects.create(user=user, name='Groceries')
 category2 = Category.objects.create(user=user, name='Salary')
 print(f"✓ Created categories: {category1.name}, {category2.name}")
+
+BudgetAllocation.objects.create(category=category1, account=account, amount=500.00)
+print(f"✓ Allocated $500.00 to {category1.name} for spending tests")
 
 print("\n" + "=" * 50)
 print("1. Testing CREATE Expense Transaction (POST /api/transactions/)")

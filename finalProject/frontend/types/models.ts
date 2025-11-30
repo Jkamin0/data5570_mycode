@@ -32,6 +32,14 @@ export interface Category {
   created_at: string;
 }
 
+export interface CategoryBalance {
+  category_id: number;
+  category_name: string;
+  allocated: string;
+  spent: string;
+  available: string;
+}
+
 export interface Allocation {
   id: number;
   category: number;

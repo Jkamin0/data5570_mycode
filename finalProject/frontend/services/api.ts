@@ -10,6 +10,7 @@ import type {
   Allocation,
   AuthResponse,
   Category,
+  CategoryBalance,
   CreateAccountPayload,
   CreateAllocationPayload,
   CreateCategoryPayload,
@@ -134,6 +135,8 @@ export const accountsAPI = {
 
 export const categoriesAPI = {
   getAll: (): Promise<AxiosResponse<Category[]>> => api.get('/categories/'),
+  getBalances: (): Promise<AxiosResponse<CategoryBalance[]>> =>
+    api.get('/categories/balances/'),
   create: (data: CreateCategoryPayload): Promise<AxiosResponse<Category>> =>
     api.post('/categories/', data),
   update: (id: number, data: UpdateCategoryPayload): Promise<AxiosResponse<Category>> =>

@@ -51,8 +51,8 @@ print(f"Response: {response.data}")
 allocation_id = response.data.get('id')
 
 account.refresh_from_db()
-print(f"✓ Account balance after allocation: ${account.balance}")
-print(f"  Expected: $4500.00, Actual: ${account.balance}")
+print(f"✓ Account balance after allocation (should be unchanged): ${account.balance}")
+print(f"  Expected: $5000.00, Actual: ${account.balance}")
 
 print("\n" + "=" * 50)
 print("2. Testing CREATE Another Allocation")
@@ -66,8 +66,8 @@ print(f"Status: {response.status_code}")
 print(f"Amount allocated to {category2.name}: ${response.data.get('amount')}")
 
 account.refresh_from_db()
-print(f"✓ Account balance after second allocation: ${account.balance}")
-print(f"  Expected: $3000.00, Actual: ${account.balance}")
+print(f"✓ Account balance after second allocation (unchanged): ${account.balance}")
+print(f"  Expected: $5000.00, Actual: ${account.balance}")
 
 print("\n" + "=" * 50)
 print("3. Testing LIST Allocations (GET /api/allocations/)")
@@ -105,13 +105,13 @@ else:
 print("\n" + "=" * 50)
 print("6. Testing DELETE Allocation (Restore Balance)")
 print("=" * 50)
-print(f"Account balance before deletion: ${account.balance}")
+print(f"Account balance before deletion (unchanged): ${account.balance}")
 response = client.delete(f'/api/allocations/{allocation_id}/')
 print(f"Status: {response.status_code}")
 
 account.refresh_from_db()
-print(f"✓ Account balance after deletion: ${account.balance}")
-print(f"  Expected: $3500.00 (restored $500), Actual: ${account.balance}")
+print(f"✓ Account balance after deletion (unchanged): ${account.balance}")
+print(f"  Expected: $5000.00, Actual: ${account.balance}")
 
 response = client.get('/api/allocations/')
 print(f"✓ Remaining allocations: {len(response.data)}")

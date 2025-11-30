@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -81,6 +82,34 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @action(detail=False, methods=['get'], url_path='balances')
+    def balances(self, request):
+        """Calculate balance for each category."""
+        categories = self.get_queryset()
+        balances = []
+
+        for category in categories:
+            allocated = BudgetAllocation.objects.filter(
+                category=category
+            ).aggregate(total=Sum('amount'))['total'] or 0
+
+            spent = Transaction.objects.filter(
+                category=category,
+                transaction_type='expense'
+            ).aggregate(total=Sum('amount'))['total'] or 0
+
+            available = allocated - spent
+
+            balances.append({
+                'category_id': category.id,
+                'category_name': category.name,
+                'allocated': str(allocated),
+                'spent': str(spent),
+                'available': str(available),
+            })
+
+        return Response(balances)
+
 
 class BudgetAllocationViewSet(viewsets.ModelViewSet):
     serializer_class = BudgetAllocationSerializer
@@ -93,22 +122,10 @@ class BudgetAllocationViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_create(self, serializer):
-        account = serializer.validated_data['account']
-        amount = serializer.validated_data['amount']
-
-        account.balance -= amount
-        account.save()
-
         serializer.save()
 
     @transaction.atomic
     def perform_destroy(self, instance):
-        account = instance.account
-        amount = instance.amount
-
-        account.balance += amount
-        account.save()
-
         instance.delete()
 
     @action(detail=False, methods=['post'], url_path='move')
@@ -126,13 +143,13 @@ class BudgetAllocationViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            amount = float(amount)
+            amount = Decimal(str(amount))
             if amount <= 0:
                 return Response(
                     {'error': 'Amount must be greater than zero'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, InvalidOperation):
             return Response(
                 {'error': 'Invalid amount'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -154,13 +171,21 @@ class BudgetAllocationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        source_allocations = BudgetAllocation.objects.filter(
-            category=source_category, account=account
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        allocated = BudgetAllocation.objects.filter(
+            category=source_category,
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
 
-        if source_allocations < amount:
+        spent = Transaction.objects.filter(
+            category=source_category,
+            transaction_type='expense'
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+        available = allocated - spent
+        if available < amount:
+            available_display = format(available, '.2f')
+            amount_display = format(amount, '.2f')
             return Response(
-                {'error': f'Insufficient funds in source category. Available: ${source_allocations}, Requested: ${amount}'},
+                {'error': f'Insufficient funds in source category. Available: ${available_display}, Requested: ${amount_display}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
