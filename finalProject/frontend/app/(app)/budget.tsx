@@ -5,8 +5,10 @@ import {
   FlatList,
   RefreshControl,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Text, Card, FAB, Snackbar, Button } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   fetchCategories,
@@ -194,9 +196,18 @@ export default function BudgetScreen() {
 
     return (
       <View style={styles.emptyState}>
-        <Text style={styles.emptyText}>No categories yet</Text>
-        <Text style={styles.emptySubtext}>
-          Create a category to start budgeting
+        <View style={styles.emptyIconContainer}>
+          <MaterialCommunityIcons
+            name="tag-off-outline"
+            size={64}
+            color={AppColors.textLight}
+          />
+        </View>
+        <Text variant="headlineSmall" style={styles.emptyTitle}>
+          No Categories Yet
+        </Text>
+        <Text variant="bodyMedium" style={styles.emptyDescription}>
+          Create a category to start organizing your budget
         </Text>
       </View>
     );
@@ -204,6 +215,64 @@ export default function BudgetScreen() {
 
   const getCategoryBalance = (categoryId: number) => {
     return balances.find((b) => b.category_id === categoryId);
+  };
+
+  const renderHeader = () => {
+    const availableToBudget = calculateAvailableToBudget();
+    const isPositive = availableToBudget >= 0;
+
+    return (
+      <View style={styles.headerContainer}>
+        <Card style={styles.summaryCard} elevation={4}>
+          <Card.Content>
+            <View style={styles.summaryHeader}>
+              <View style={styles.summaryIconCircle}>
+                <MaterialCommunityIcons
+                  name="cash-check"
+                  size={32}
+                  color="#fff"
+                />
+              </View>
+              <View style={styles.summaryTextContainer}>
+                <Text variant="titleSmall" style={styles.summaryLabel}>
+                  Available to Budget
+                </Text>
+                <Text
+                  variant="displaySmall"
+                  style={[
+                    styles.summaryAmount,
+                    { color: isPositive ? '#fff' : AppColors.coral },
+                  ]}
+                >
+                  ${availableToBudget.toFixed(2)}
+                </Text>
+              </View>
+            </View>
+            <Button
+              mode="contained"
+              icon="swap-horizontal"
+              onPress={() => setMoveMoneyDialogVisible(true)}
+              style={styles.moveMoneyButton}
+              labelStyle={styles.moveMoneyButtonLabel}
+              disabled={categories.length < 2 || balances.length === 0}
+              buttonColor={AppColors.limeGreen}
+              textColor={AppColors.textOnPrimary}
+            >
+              Move Money
+            </Button>
+            {(categories.length < 2 || balances.length === 0) && (
+              <Text variant="bodySmall" style={styles.moveMoneyHint}>
+                Add at least two categories with balances to move money between them
+              </Text>
+            )}
+          </Card.Content>
+        </Card>
+
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          Budget Categories
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -220,38 +289,18 @@ export default function BudgetScreen() {
             onDelete={handleDeleteCategory}
           />
         )}
-        ListHeaderComponent={
-          <Card style={styles.summaryCard}>
-            <Card.Content>
-              <Text variant="bodyMedium" style={styles.summaryLabel}>
-                Available to Budget
-              </Text>
-              <Text variant="headlineLarge" style={styles.summaryAmount}>
-                ${calculateAvailableToBudget().toFixed(2)}
-              </Text>
-              <Button
-                mode="outlined"
-                icon="swap-horizontal"
-                onPress={() => setMoveMoneyDialogVisible(true)}
-                style={styles.moveMoneyButton}
-                textColor="#fff"
-                disabled={categories.length < 2 || balances.length === 0}
-              >
-                Move Money
-              </Button>
-              {(categories.length < 2 || balances.length === 0) && (
-                <Text variant="bodySmall" style={styles.moveMoneyHint}>
-                  Add at least two categories with balances to move money.
-                </Text>
-              )}
-            </Card.Content>
-          </Card>
-        }
+        ListHeaderComponent={categories.length > 0 ? renderHeader : null}
         ListEmptyComponent={renderEmptyState}
-        contentContainerStyle={categories.length === 0 ? styles.emptyContainer : undefined}
+        contentContainerStyle={categories.length === 0 ? styles.emptyContainer : styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[AppColors.primary]}
+            tintColor={AppColors.primary}
+          />
         }
+        showsVerticalScrollIndicator={Platform.OS === 'web'}
       />
 
       <FAB
@@ -259,6 +308,7 @@ export default function BudgetScreen() {
         label="Add Category"
         onPress={() => setCategoryDialogVisible(true)}
         style={styles.fab}
+        color={AppColors.textOnPrimary}
       />
 
       <CreateCategoryDialog
@@ -296,6 +346,7 @@ export default function BudgetScreen() {
           label: 'Dismiss',
           onPress: handleDismissSnackbar,
         }}
+        style={styles.snackbar}
       >
         {error ? errorToMessage(error) : ''}
       </Snackbar>
@@ -306,29 +357,64 @@ export default function BudgetScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: AppColors.background,
   },
+  headerContainer: {
+    marginBottom: 8,
+  },
   summaryCard: {
-    marginBottom: 16,
+    marginBottom: 20,
     backgroundColor: AppColors.oliveGreen,
-    elevation: 4,
+    borderRadius: 16,
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 16,
+  },
+  summaryIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  summaryTextContainer: {
+    flex: 1,
   },
   summaryLabel: {
-    color: '#fff',
+    color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 4,
+    fontWeight: '600',
   },
   summaryAmount: {
     color: '#fff',
     fontWeight: '700',
+    letterSpacing: -1,
   },
   moveMoneyButton: {
-    marginTop: 12,
-    borderColor: '#fff',
+    borderRadius: 12,
+  },
+  moveMoneyButtonLabel: {
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   moveMoneyHint: {
-    marginTop: 6,
-    color: '#e0e0e0',
+    marginTop: 8,
+    color: 'rgba(255, 255, 255, 0.8)',
+    lineHeight: 18,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+    color: AppColors.textPrimary,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  listContent: {
+    padding: 16,
+    paddingBottom: 88,
   },
   emptyContainer: {
     flex: 1,
@@ -337,21 +423,46 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 48,
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: AppColors.surfaceVariant,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    marginBottom: 12,
+    color: AppColors.textSecondary,
+    fontWeight: '700',
+  },
+  emptyDescription: {
+    color: AppColors.textLight,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 16,
     color: AppColors.textSecondary,
     marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: AppColors.textLight,
-    marginTop: 8,
   },
   fab: {
     position: 'absolute',
     right: 16,
     bottom: 16,
+    backgroundColor: AppColors.primary,
+    borderRadius: 28,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  snackbar: {
+    backgroundColor: AppColors.surfaceElevated,
   },
 });

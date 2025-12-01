@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { View, StyleSheet, FlatList, RefreshControl, Platform } from 'react-native';
 import { Text, Card, FAB, ActivityIndicator, Snackbar } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { fetchAccounts, createAccount, clearError } from '../../store/slices/accountsSlice';
 import { fetchCategoryBalances } from '../../store/slices/categoriesSlice';
@@ -12,7 +13,7 @@ import { AppColors } from '../../theme/colors';
 export default function AccountsScreen() {
   const dispatch = useAppDispatch();
   const { items: accounts, loading, error } = useAppSelector((state) => state.accounts);
-   const { balances } = useAppSelector((state) => state.categories);
+  const { balances } = useAppSelector((state) => state.categories);
   const [refreshing, setRefreshing] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -73,34 +74,123 @@ export default function AccountsScreen() {
     return totalAccountBalance - totalAllocated + totalSpent;
   };
 
-  const renderAccountItem = ({ item }: { item: Account }) => (
-    <Card style={styles.accountCard}>
-      <Card.Content>
-        <View style={styles.accountHeader}>
-          <Text variant="titleMedium" style={styles.accountName}>
-            {item.name}
-          </Text>
-          <Text variant="titleLarge" style={styles.accountBalance}>
-            ${parseFloat(item.balance).toFixed(2)}
-          </Text>
-        </View>
-        <Text variant="bodySmall" style={styles.accountDate}>
-          Updated {new Date(item.updated_at).toLocaleDateString()}
-        </Text>
-      </Card.Content>
-    </Card>
-  );
+  const getTotalBalance = (): number => {
+    return accounts.reduce(
+      (total, account) => total + parseFloat(account.balance || '0'),
+      0,
+    );
+  };
+
+  const renderAccountItem = ({ item }: { item: Account }) => {
+    const balance = parseFloat(item.balance);
+    const isPositive = balance >= 0;
+
+    return (
+      <Card style={styles.accountCard} elevation={2}>
+        <Card.Content>
+          <View style={styles.accountHeader}>
+            <View style={styles.accountIconContainer}>
+              <MaterialCommunityIcons
+                name="bank"
+                size={28}
+                color={AppColors.limeGreen}
+              />
+            </View>
+            <View style={styles.accountInfo}>
+              <Text variant="titleMedium" style={styles.accountName}>
+                {item.name}
+              </Text>
+              <Text variant="bodySmall" style={styles.accountDate}>
+                Updated {new Date(item.updated_at).toLocaleDateString()}
+              </Text>
+            </View>
+            <View style={styles.accountBalanceContainer}>
+              <Text
+                variant="headlineSmall"
+                style={[
+                  styles.accountBalance,
+                  { color: isPositive ? AppColors.positive : AppColors.negative },
+                ]}
+              >
+                ${balance.toFixed(2)}
+              </Text>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+    );
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
+      <View style={styles.emptyIconContainer}>
+        <MaterialCommunityIcons
+          name="bank-off-outline"
+          size={64}
+          color={AppColors.textLight}
+        />
+      </View>
       <Text variant="headlineSmall" style={styles.emptyTitle}>
         No Accounts Yet
       </Text>
       <Text variant="bodyMedium" style={styles.emptyDescription}>
-        Create your first account to start budgeting
+        Create your first account to start budgeting and tracking your finances
       </Text>
     </View>
   );
+
+  const renderHeader = () => {
+    const availableToBudget = calculateAvailableToBudget();
+    const totalBalance = getTotalBalance();
+    const isAvailablePositive = availableToBudget >= 0;
+
+    return (
+      <View style={styles.headerContainer}>
+        <Card style={styles.totalCard} elevation={4}>
+          <Card.Content>
+            <View style={styles.totalCardContent}>
+              <View style={styles.totalSection}>
+                <View style={styles.totalIconCircle}>
+                  <MaterialCommunityIcons
+                    name="cash-multiple"
+                    size={32}
+                    color="#fff"
+                  />
+                </View>
+                <View style={styles.totalTextContainer}>
+                  <Text variant="titleSmall" style={styles.totalLabel}>
+                    Total Balance
+                  </Text>
+                  <Text variant="displaySmall" style={styles.totalAmount}>
+                    ${totalBalance.toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.dividerVertical} />
+              <View style={styles.availableSection}>
+                <Text variant="labelMedium" style={styles.availableLabel}>
+                  Available to Budget
+                </Text>
+                <Text
+                  variant="headlineMedium"
+                  style={[
+                    styles.availableAmount,
+                    { color: isAvailablePositive ? '#fff' : AppColors.coral },
+                  ]}
+                >
+                  ${availableToBudget.toFixed(2)}
+                </Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          Your Accounts
+        </Text>
+      </View>
+    );
+  };
 
   if (loading && accounts.length === 0) {
     return (
@@ -111,30 +201,24 @@ export default function AccountsScreen() {
     );
   }
 
-  const availableToBudget = calculateAvailableToBudget();
-
   return (
     <View style={styles.container}>
-      <Card style={styles.totalCard}>
-        <Card.Content>
-          <Text variant="titleSmall" style={styles.totalLabel}>
-            Total Available to Budget
-          </Text>
-          <Text variant="displaySmall" style={styles.totalAmount}>
-            ${availableToBudget.toFixed(2)}
-          </Text>
-        </Card.Content>
-      </Card>
-
       <FlatList
         data={accounts}
         renderItem={renderAccountItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={accounts.length > 0 ? renderHeader : null}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[AppColors.primary]}
+            tintColor={AppColors.primary}
+          />
         }
+        showsVerticalScrollIndicator={Platform.OS === 'web'}
       />
 
       <FAB
@@ -142,6 +226,7 @@ export default function AccountsScreen() {
         style={styles.fab}
         onPress={handleOpenDialog}
         label="Add Account"
+        color={AppColors.textOnPrimary}
       />
 
       <CreateAccountDialog
@@ -164,6 +249,7 @@ export default function AccountsScreen() {
             dispatch(clearError());
           },
         }}
+        style={styles.snackbar}
       >
         {errorMessage}
       </Snackbar>
@@ -185,61 +271,149 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     color: AppColors.textSecondary,
+    fontSize: 16,
+  },
+  headerContainer: {
+    marginBottom: 8,
   },
   totalCard: {
-    margin: 16,
-    marginBottom: 8,
+    marginBottom: 20,
     backgroundColor: AppColors.oliveGreen,
+    borderRadius: 16,
+  },
+  totalCardContent: {
+    flexDirection: 'column',
+    gap: 16,
+  },
+  totalSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  totalIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  totalTextContainer: {
+    flex: 1,
   },
   totalLabel: {
-    color: '#fff',
-    marginBottom: 8,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 4,
+    fontWeight: '600',
   },
   totalAmount: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: -1,
+  },
+  dividerVertical: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  availableSection: {
+    alignItems: 'flex-start',
+  },
+  availableLabel: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  availableAmount: {
+    color: '#fff',
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+    color: AppColors.textPrimary,
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
   listContent: {
     padding: 16,
-    paddingTop: 8,
-    paddingBottom: 80,
+    paddingBottom: 88,
   },
   accountCard: {
     marginBottom: 12,
+    backgroundColor: AppColors.surface,
+    borderRadius: 12,
   },
   accountHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 12,
+  },
+  accountIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${AppColors.limeGreen}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  accountInfo: {
+    flex: 1,
   },
   accountName: {
-    flex: 1,
+    marginBottom: 4,
     color: AppColors.textPrimary,
-  },
-  accountBalance: {
-    fontWeight: 'bold',
-    color: AppColors.primary,
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
   accountDate: {
     color: AppColors.textSecondary,
   },
+  accountBalanceContainer: {
+    alignItems: 'flex-end',
+  },
+  accountBalance: {
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: AppColors.surfaceVariant,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   emptyTitle: {
     marginBottom: 12,
     color: AppColors.textSecondary,
+    fontWeight: '700',
   },
   emptyDescription: {
     color: AppColors.textLight,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   fab: {
     position: 'absolute',
     margin: 16,
     right: 0,
     bottom: 0,
+    backgroundColor: AppColors.primary,
+    borderRadius: 28,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  snackbar: {
+    backgroundColor: AppColors.surfaceElevated,
   },
 });

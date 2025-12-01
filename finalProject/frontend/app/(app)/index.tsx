@@ -1,5 +1,6 @@
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, Platform } from 'react-native';
 import { FAB, Card, Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch } from '../../store/hooks';
 import { logoutUser } from '../../store/slices/authSlice';
 import BudgetHealthDashboard from '../../components/BudgetHealthDashboard';
@@ -14,15 +15,29 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <Card style={styles.card}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={Platform.OS === 'web'}
+      >
+        <Card style={styles.welcomeCard} elevation={3}>
           <Card.Content>
-            <Text variant="headlineMedium" style={styles.title}>
-              Budget Health Dashboard
-            </Text>
-            <Text variant="bodyMedium" style={styles.subtitle}>
-              Track your spending across categories
-            </Text>
+            <View style={styles.welcomeHeader}>
+              <View style={styles.iconCircle}>
+                <MaterialCommunityIcons
+                  name="chart-line"
+                  size={32}
+                  color={AppColors.limeGreen}
+                />
+              </View>
+              <View style={styles.welcomeTextContainer}>
+                <Text variant="headlineSmall" style={styles.welcomeTitle}>
+                  Budget Health
+                </Text>
+                <Text variant="bodyMedium" style={styles.welcomeSubtitle}>
+                  Track your spending across all categories
+                </Text>
+              </View>
+            </View>
           </Card.Content>
         </Card>
 
@@ -31,10 +46,12 @@ export default function DashboardScreen() {
 
       <FAB
         icon="logout"
+        label="Logout"
         onPress={handleLogout}
         style={styles.logoutFab}
-        color="#fff"
+        color={AppColors.textOnPrimary}
         customSize={56}
+        variant="secondary"
       />
     </View>
   );
@@ -47,26 +64,49 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    padding: 16,
   },
-  card: {
-    marginTop: 16,
+  welcomeCard: {
+    margin: 16,
+    marginBottom: 12,
+    backgroundColor: AppColors.surfaceElevated,
+    borderRadius: 16,
   },
-  title: {
-    marginBottom: 16,
-    textAlign: 'center',
+  welcomeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: `${AppColors.limeGreen}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeTextContainer: {
+    flex: 1,
+  },
+  welcomeTitle: {
+    marginBottom: 4,
     color: AppColors.textPrimary,
+    fontWeight: '700',
+    letterSpacing: -0.5,
   },
-  subtitle: {
-    marginBottom: 8,
-    textAlign: 'center',
-    color: AppColors.oliveGreen,
-    fontWeight: '600',
+  welcomeSubtitle: {
+    color: AppColors.textSecondary,
+    lineHeight: 20,
   },
   logoutFab: {
     position: 'absolute',
     right: 16,
     bottom: 16,
     backgroundColor: AppColors.coral,
+    borderRadius: 28,
+    shadowColor: AppColors.coral,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
 });

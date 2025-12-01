@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Platform } from 'react-native';
 import { AppColors } from '../../theme/colors';
 
 export default function AppLayout() {
@@ -10,14 +11,37 @@ export default function AppLayout() {
         headerStyle: {
           backgroundColor: AppColors.surface,
           borderBottomWidth: 0,
+          elevation: 4,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
-        headerShadowVisible: false,
+        headerShadowVisible: Platform.OS === 'ios',
         headerTintColor: AppColors.textPrimary,
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: 20,
+          letterSpacing: -0.5,
+        },
         tabBarActiveTintColor: AppColors.primary,
         tabBarInactiveTintColor: AppColors.textSecondary,
         tabBarStyle: {
           backgroundColor: AppColors.surface,
           borderTopColor: AppColors.border,
+          borderTopWidth: 1,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+          paddingTop: 8,
+          height: Platform.OS === 'ios' ? 88 : 64,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
         },
       }}
     >
@@ -25,8 +49,13 @@ export default function AppLayout() {
         name="index"
         options={{
           title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="view-dashboard" size={size} color={color} />
+          tabBarLabel: 'Dashboard',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'view-dashboard' : 'view-dashboard-outline'}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -34,8 +63,13 @@ export default function AppLayout() {
         name="accounts"
         options={{
           title: 'Accounts',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="bank" size={size} color={color} />
+          tabBarLabel: 'Accounts',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'bank' : 'bank-outline'}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -43,8 +77,13 @@ export default function AppLayout() {
         name="budget"
         options={{
           title: 'Budget',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="calculator" size={size} color={color} />
+          tabBarLabel: 'Budget',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'calculator' : 'calculator-variant-outline'}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -52,8 +91,13 @@ export default function AppLayout() {
         name="transactions"
         options={{
           title: 'Transactions',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="receipt" size={size} color={color} />
+          tabBarLabel: 'Transactions',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'receipt' : 'receipt-outline'}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Dialog, Portal, TextInput, Button, HelperText } from 'react-native-paper';
+import { Dialog, Portal, TextInput, Button, HelperText, Text } from 'react-native-paper';
 import { AppColors } from '../theme/colors';
 
 interface CreateCategoryDialogProps {
@@ -87,15 +87,30 @@ export default function CreateCategoryDialog({
               placeholderTextColor={AppColors.textLight}
             />
             {validationErrors.name && (
-              <HelperText type="error">{validationErrors.name}</HelperText>
+              <HelperText type="error" style={styles.errorText}>
+                {validationErrors.name}
+              </HelperText>
             )}
           </View>
         </Dialog.Content>
-        <Dialog.Actions>
-          <Button onPress={handleClose} disabled={submitting} textColor={AppColors.textSecondary}>
+        <Dialog.Actions style={styles.actions}>
+          <Button
+            onPress={handleClose}
+            disabled={submitting}
+            textColor={AppColors.textSecondary}
+            style={styles.cancelButton}
+          >
             Cancel
           </Button>
-          <Button onPress={handleSubmit} loading={submitting} disabled={submitting}>
+          <Button
+            onPress={handleSubmit}
+            loading={submitting}
+            disabled={submitting}
+            mode="contained"
+            buttonColor={AppColors.primary}
+            textColor={AppColors.textOnPrimary}
+            style={styles.submitButton}
+          >
             {mode === 'edit' ? 'Update' : 'Create'}
           </Button>
         </Dialog.Actions>
@@ -107,15 +122,35 @@ export default function CreateCategoryDialog({
 const styles = StyleSheet.create({
   dialog: {
     backgroundColor: AppColors.dialogBackground,
+    borderRadius: 8,
+    width: '90%',
+    maxWidth: 1000,
+    alignSelf: 'center',
   },
   title: {
     color: AppColors.textPrimary,
+    fontSize: 20,
+    fontWeight: '600',
   },
   form: {
-    gap: 8,
+    gap: 16,
+    paddingTop: 8,
   },
   input: {
-    marginBottom: 8,
     backgroundColor: AppColors.inputBackground,
+  },
+  errorText: {
+    marginTop: -12,
+  },
+  actions: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  cancelButton: {
+    marginRight: 8,
+  },
+  submitButton: {
+    minWidth: 100,
   },
 });

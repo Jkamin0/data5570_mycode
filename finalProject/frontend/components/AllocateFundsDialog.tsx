@@ -120,85 +120,114 @@ export default function AllocateFundsDialog({
         <Dialog.ScrollArea>
           <ScrollView>
             <View style={styles.form}>
-              <Pressable
-                onPress={() => !submitting && !preselectedCategoryId && setCategoryMenuVisible(true)}
-              >
-                <TextInput
-                  label="Category"
-                  value={selectedCategory?.name || ''}
-                  error={!!validationErrors.categoryId}
-                  disabled={submitting || !!preselectedCategoryId}
-                  style={styles.input}
-                  placeholder="Select a category"
-                  mode="outlined"
-                  outlineColor={AppColors.border}
-                  activeOutlineColor={AppColors.primary}
-                  textColor={AppColors.textPrimary}
-                  placeholderTextColor={AppColors.textLight}
-                  right={<TextInput.Icon icon="menu-down" />}
-                  editable={false}
-                  pointerEvents="none"
-                />
-              </Pressable>
-              {validationErrors.categoryId && (
-                <HelperText type="error">{validationErrors.categoryId}</HelperText>
-              )}
+              <View>
+                <Pressable
+                  onPress={() => !submitting && !preselectedCategoryId && setCategoryMenuVisible(true)}
+                >
+                  <TextInput
+                    label="Category"
+                    value={selectedCategory?.name || ''}
+                    error={!!validationErrors.categoryId}
+                    disabled={submitting || !!preselectedCategoryId}
+                    style={styles.input}
+                    placeholder="Select a category"
+                    mode="outlined"
+                    outlineColor={AppColors.border}
+                    activeOutlineColor={AppColors.primary}
+                    textColor={AppColors.textPrimary}
+                    placeholderTextColor={AppColors.textLight}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    editable={false}
+                    pointerEvents="none"
+                  />
+                </Pressable>
+                {validationErrors.categoryId && (
+                  <HelperText type="error" style={styles.errorText}>
+                    {validationErrors.categoryId}
+                  </HelperText>
+                )}
+              </View>
 
-              <Pressable onPress={() => !submitting && setAccountMenuVisible(true)}>
+              <View>
+                <Pressable onPress={() => !submitting && setAccountMenuVisible(true)}>
+                  <TextInput
+                    label="Account"
+                    value={selectedAccount?.name || ''}
+                    error={!!validationErrors.accountId}
+                    disabled={submitting}
+                    style={styles.input}
+                    placeholder="Select an account"
+                    mode="outlined"
+                    outlineColor={AppColors.border}
+                    activeOutlineColor={AppColors.primary}
+                    textColor={AppColors.textPrimary}
+                    placeholderTextColor={AppColors.textLight}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    editable={false}
+                    pointerEvents="none"
+                  />
+                </Pressable>
+                {validationErrors.accountId && (
+                  <HelperText type="error" style={styles.errorText}>
+                    {validationErrors.accountId}
+                  </HelperText>
+                )}
+                {selectedAccount && (
+                  <Text variant="bodySmall" style={styles.helperText}>
+                    Account balance: ${parseFloat(selectedAccount.balance).toFixed(2)}
+                  </Text>
+                )}
+              </View>
+
+              <View>
                 <TextInput
-                  label="Account"
-                  value={selectedAccount?.name || ''}
-                  error={!!validationErrors.accountId}
+                  label="Amount"
+                  value={formData.amount}
+                  onChangeText={(text) => setFormData({ ...formData, amount: text })}
+                  error={!!validationErrors.amount}
                   disabled={submitting}
+                  keyboardType="decimal-pad"
                   style={styles.input}
-                  placeholder="Select an account"
+                  placeholder="0.00"
                   mode="outlined"
                   outlineColor={AppColors.border}
                   activeOutlineColor={AppColors.primary}
                   textColor={AppColors.textPrimary}
                   placeholderTextColor={AppColors.textLight}
-                  right={<TextInput.Icon icon="menu-down" />}
-                  editable={false}
-                  pointerEvents="none"
+                  left={<TextInput.Affix text="$" textStyle={{ color: AppColors.textSecondary }} />}
                 />
-              </Pressable>
-              {validationErrors.accountId && (
-                <HelperText type="error">{validationErrors.accountId}</HelperText>
-              )}
-
-              <TextInput
-                label="Amount"
-                value={formData.amount}
-                onChangeText={(text) => setFormData({ ...formData, amount: text })}
-                error={!!validationErrors.amount}
-                disabled={submitting}
-                keyboardType="decimal-pad"
-                style={styles.input}
-                placeholder="0.00"
-                mode="outlined"
-                outlineColor={AppColors.border}
-                activeOutlineColor={AppColors.primary}
-                textColor={AppColors.textPrimary}
-                placeholderTextColor={AppColors.textLight}
-                left={<TextInput.Affix text="$" textStyle={{ color: AppColors.textSecondary }} />}
-              />
-              {validationErrors.amount && (
-                <HelperText type="error">{validationErrors.amount}</HelperText>
-              )}
-
-              {availableToBudget !== undefined && (
-                <Text style={styles.helperText}>
-                  Available to Budget: ${availableToBudget.toFixed(2)}
-                </Text>
-              )}
+                {validationErrors.amount && (
+                  <HelperText type="error" style={styles.errorText}>
+                    {validationErrors.amount}
+                  </HelperText>
+                )}
+                {availableToBudget !== undefined && (
+                  <Text style={styles.helperText}>
+                    Available to Budget: ${availableToBudget.toFixed(2)}
+                  </Text>
+                )}
+              </View>
             </View>
           </ScrollView>
         </Dialog.ScrollArea>
-        <Dialog.Actions>
-          <Button onPress={handleClose} disabled={submitting} textColor={AppColors.textSecondary}>
+        <Dialog.Actions style={styles.actions}>
+          <Button
+            onPress={handleClose}
+            disabled={submitting}
+            textColor={AppColors.textSecondary}
+            style={styles.cancelButton}
+          >
             Cancel
           </Button>
-          <Button onPress={handleSubmit} loading={submitting} disabled={submitting}>
+          <Button
+            onPress={handleSubmit}
+            loading={submitting}
+            disabled={submitting}
+            mode="contained"
+            buttonColor={AppColors.primary}
+            textColor={AppColors.textOnPrimary}
+            style={styles.submitButton}
+          >
             Allocate
           </Button>
         </Dialog.Actions>
@@ -216,7 +245,11 @@ export default function AllocateFundsDialog({
             <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {categories.length === 0 ? (
-                <List.Item title="No categories available" disabled titleStyle={styles.listItemText} />
+                <List.Item
+                  title="No categories available"
+                  disabled
+                  titleStyle={styles.listItemText}
+                />
               ) : (
                 categories.map((category) => (
                   <List.Item
@@ -249,13 +282,19 @@ export default function AllocateFundsDialog({
             <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {accounts.length === 0 ? (
-                <List.Item title="No accounts available" disabled titleStyle={styles.listItemText} />
+                <List.Item
+                  title="No accounts available"
+                  disabled
+                  titleStyle={styles.listItemText}
+                />
               ) : (
                 accounts.map((account) => (
                   <List.Item
                     key={account.id}
                     title={account.name}
+                    description={`$${parseFloat(account.balance).toFixed(2)}`}
                     titleStyle={styles.listItemText}
+                    descriptionStyle={styles.listItemDescription}
                     onPress={() => {
                       setFormData({ ...formData, accountId: account.id });
                       setAccountMenuVisible(false);
@@ -276,23 +315,42 @@ export default function AllocateFundsDialog({
 const styles = StyleSheet.create({
   dialog: {
     backgroundColor: AppColors.dialogBackground,
+    borderRadius: 8,
+    width: '90%',
+    maxWidth: 1000,
+    alignSelf: 'center',
   },
   title: {
     color: AppColors.textPrimary,
+    fontSize: 20,
+    fontWeight: '600',
   },
   form: {
-    gap: 8,
+    gap: 16,
     paddingHorizontal: 24,
     paddingVertical: 8,
   },
   input: {
-    marginBottom: 8,
     backgroundColor: AppColors.inputBackground,
+  },
+  errorText: {
+    marginTop: -12,
   },
   helperText: {
     color: AppColors.textSecondary,
     fontSize: 12,
-    marginTop: -4,
+    marginTop: 4,
+  },
+  actions: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  cancelButton: {
+    marginRight: 8,
+  },
+  submitButton: {
+    minWidth: 100,
   },
   modalOverlay: {
     flex: 1,
@@ -330,6 +388,9 @@ const styles = StyleSheet.create({
   },
   listItemText: {
     color: AppColors.textPrimary,
+  },
+  listItemDescription: {
+    color: AppColors.textSecondary,
   },
   divider: {
     backgroundColor: AppColors.divider,

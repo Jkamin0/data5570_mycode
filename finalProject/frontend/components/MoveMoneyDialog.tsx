@@ -154,105 +154,133 @@ export default function MoveMoneyDialog({
         <Dialog.ScrollArea>
           <ScrollView>
             <View style={styles.form}>
-              <Pressable onPress={() => !submitting && setSourceMenuVisible(true)}>
+              <View>
+                <Pressable onPress={() => !submitting && setSourceMenuVisible(true)}>
+                  <TextInput
+                    label="From Category"
+                    value={selectedSourceCategory ? getCategoryDisplayText(formData.sourceCategoryId!) : ''}
+                    error={!!validationErrors.sourceCategoryId}
+                    disabled={submitting}
+                    style={styles.input}
+                    placeholder="Select source category"
+                    mode="outlined"
+                    outlineColor={AppColors.border}
+                    activeOutlineColor={AppColors.primary}
+                    textColor={AppColors.textPrimary}
+                    placeholderTextColor={AppColors.textLight}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    editable={false}
+                    pointerEvents="none"
+                  />
+                </Pressable>
+                {validationErrors.sourceCategoryId && (
+                  <HelperText type="error" style={styles.errorText}>
+                    {validationErrors.sourceCategoryId}
+                  </HelperText>
+                )}
+              </View>
+
+              <View>
+                <Pressable onPress={() => !submitting && setTargetMenuVisible(true)}>
+                  <TextInput
+                    label="To Category"
+                    value={selectedTargetCategory?.name || ''}
+                    error={!!validationErrors.targetCategoryId}
+                    disabled={submitting}
+                    style={styles.input}
+                    placeholder="Select target category"
+                    mode="outlined"
+                    outlineColor={AppColors.border}
+                    activeOutlineColor={AppColors.primary}
+                    textColor={AppColors.textPrimary}
+                    placeholderTextColor={AppColors.textLight}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    editable={false}
+                    pointerEvents="none"
+                  />
+                </Pressable>
+                {validationErrors.targetCategoryId && (
+                  <HelperText type="error" style={styles.errorText}>
+                    {validationErrors.targetCategoryId}
+                  </HelperText>
+                )}
+              </View>
+
+              <View>
+                <Pressable onPress={() => !submitting && setAccountMenuVisible(true)}>
+                  <TextInput
+                    label="Account"
+                    value={selectedAccount?.name || ''}
+                    error={!!validationErrors.accountId}
+                    disabled={submitting}
+                    style={styles.input}
+                    placeholder="Select account"
+                    mode="outlined"
+                    outlineColor={AppColors.border}
+                    activeOutlineColor={AppColors.primary}
+                    textColor={AppColors.textPrimary}
+                    placeholderTextColor={AppColors.textLight}
+                    right={<TextInput.Icon icon="menu-down" />}
+                    editable={false}
+                    pointerEvents="none"
+                  />
+                </Pressable>
+                {validationErrors.accountId && (
+                  <HelperText type="error" style={styles.errorText}>
+                    {validationErrors.accountId}
+                  </HelperText>
+                )}
+              </View>
+
+              <View>
                 <TextInput
-                  label="From Category"
-                  value={selectedSourceCategory ? getCategoryDisplayText(formData.sourceCategoryId!) : ''}
-                  error={!!validationErrors.sourceCategoryId}
+                  label="Amount"
+                  value={formData.amount}
+                  onChangeText={(text) => setFormData({ ...formData, amount: text })}
+                  error={!!validationErrors.amount}
                   disabled={submitting}
+                  keyboardType="decimal-pad"
                   style={styles.input}
-                  placeholder="Select source category"
+                  placeholder="0.00"
                   mode="outlined"
                   outlineColor={AppColors.border}
                   activeOutlineColor={AppColors.primary}
                   textColor={AppColors.textPrimary}
                   placeholderTextColor={AppColors.textLight}
-                  right={<TextInput.Icon icon="menu-down" />}
-                  editable={false}
-                  pointerEvents="none"
+                  left={<TextInput.Affix text="$" textStyle={{ color: AppColors.textSecondary }} />}
                 />
-              </Pressable>
-              {validationErrors.sourceCategoryId && (
-                <HelperText type="error">{validationErrors.sourceCategoryId}</HelperText>
-              )}
-
-              <Pressable onPress={() => !submitting && setTargetMenuVisible(true)}>
-                <TextInput
-                  label="To Category"
-                  value={selectedTargetCategory?.name || ''}
-                  error={!!validationErrors.targetCategoryId}
-                  disabled={submitting}
-                  style={styles.input}
-                  placeholder="Select target category"
-                  mode="outlined"
-                  outlineColor={AppColors.border}
-                  activeOutlineColor={AppColors.primary}
-                  textColor={AppColors.textPrimary}
-                  placeholderTextColor={AppColors.textLight}
-                  right={<TextInput.Icon icon="menu-down" />}
-                  editable={false}
-                  pointerEvents="none"
-                />
-              </Pressable>
-              {validationErrors.targetCategoryId && (
-                <HelperText type="error">{validationErrors.targetCategoryId}</HelperText>
-              )}
-
-              <Pressable onPress={() => !submitting && setAccountMenuVisible(true)}>
-                <TextInput
-                  label="Account"
-                  value={selectedAccount?.name || ''}
-                  error={!!validationErrors.accountId}
-                  disabled={submitting}
-                  style={styles.input}
-                  placeholder="Select account"
-                  mode="outlined"
-                  outlineColor={AppColors.border}
-                  activeOutlineColor={AppColors.primary}
-                  textColor={AppColors.textPrimary}
-                  placeholderTextColor={AppColors.textLight}
-                  right={<TextInput.Icon icon="menu-down" />}
-                  editable={false}
-                  pointerEvents="none"
-                />
-              </Pressable>
-              {validationErrors.accountId && (
-                <HelperText type="error">{validationErrors.accountId}</HelperText>
-              )}
-
-              <TextInput
-                label="Amount"
-                value={formData.amount}
-                onChangeText={(text) => setFormData({ ...formData, amount: text })}
-                error={!!validationErrors.amount}
-                disabled={submitting}
-                keyboardType="decimal-pad"
-                style={styles.input}
-                placeholder="0.00"
-                mode="outlined"
-                outlineColor={AppColors.border}
-                activeOutlineColor={AppColors.primary}
-                textColor={AppColors.textPrimary}
-                placeholderTextColor={AppColors.textLight}
-                left={<TextInput.Affix text="$" textStyle={{ color: AppColors.textSecondary }} />}
-              />
-              {validationErrors.amount && (
-                <HelperText type="error">{validationErrors.amount}</HelperText>
-              )}
-
-              {sourceBalance && (
-                <Text style={styles.helperText}>
-                  Available in source: ${parseFloat(sourceBalance.available).toFixed(2)}
-                </Text>
-              )}
+                {validationErrors.amount && (
+                  <HelperText type="error" style={styles.errorText}>
+                    {validationErrors.amount}
+                  </HelperText>
+                )}
+                {sourceBalance && (
+                  <Text style={styles.helperText}>
+                    Available in source: ${parseFloat(sourceBalance.available).toFixed(2)}
+                  </Text>
+                )}
+              </View>
             </View>
           </ScrollView>
         </Dialog.ScrollArea>
-        <Dialog.Actions>
-          <Button onPress={handleClose} disabled={submitting} textColor={AppColors.textSecondary}>
+        <Dialog.Actions style={styles.actions}>
+          <Button
+            onPress={handleClose}
+            disabled={submitting}
+            textColor={AppColors.textSecondary}
+            style={styles.cancelButton}
+          >
             Cancel
           </Button>
-          <Button onPress={handleSubmit} loading={submitting} disabled={submitting}>
+          <Button
+            onPress={handleSubmit}
+            loading={submitting}
+            disabled={submitting}
+            mode="contained"
+            buttonColor={AppColors.primary}
+            textColor={AppColors.textOnPrimary}
+            style={styles.submitButton}
+          >
             Move Money
           </Button>
         </Dialog.Actions>
@@ -270,7 +298,11 @@ export default function MoveMoneyDialog({
             <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {categories.length === 0 ? (
-                <List.Item title="No categories available" disabled titleStyle={styles.listItemText} />
+                <List.Item
+                  title="No categories available"
+                  disabled
+                  titleStyle={styles.listItemText}
+                />
               ) : (
                 categories.map((category) => {
                   const balance = balances.find((b) => b.category_id === category.id);
@@ -314,7 +346,11 @@ export default function MoveMoneyDialog({
             <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {categories.length === 0 ? (
-                <List.Item title="No categories available" disabled titleStyle={styles.listItemText} />
+                <List.Item
+                  title="No categories available"
+                  disabled
+                  titleStyle={styles.listItemText}
+                />
               ) : (
                 categories
                   .filter((c) => c.id !== formData.sourceCategoryId)
@@ -349,13 +385,19 @@ export default function MoveMoneyDialog({
             <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {accounts.length === 0 ? (
-                <List.Item title="No accounts available" disabled titleStyle={styles.listItemText} />
+                <List.Item
+                  title="No accounts available"
+                  disabled
+                  titleStyle={styles.listItemText}
+                />
               ) : (
                 accounts.map((account) => (
                   <List.Item
                     key={account.id}
                     title={account.name}
+                    description={`$${parseFloat(account.balance).toFixed(2)}`}
                     titleStyle={styles.listItemText}
+                    descriptionStyle={styles.listItemDescription}
                     onPress={() => {
                       setFormData({ ...formData, accountId: account.id });
                       setAccountMenuVisible(false);
@@ -376,23 +418,42 @@ export default function MoveMoneyDialog({
 const styles = StyleSheet.create({
   dialog: {
     backgroundColor: AppColors.dialogBackground,
+    borderRadius: 8,
+    width: '90%',
+    maxWidth: 1000,
+    alignSelf: 'center',
   },
   title: {
     color: AppColors.textPrimary,
+    fontSize: 20,
+    fontWeight: '600',
   },
   form: {
-    gap: 8,
+    gap: 16,
     paddingHorizontal: 24,
     paddingVertical: 8,
   },
   input: {
-    marginBottom: 8,
     backgroundColor: AppColors.inputBackground,
+  },
+  errorText: {
+    marginTop: -12,
   },
   helperText: {
     color: AppColors.textSecondary,
     fontSize: 12,
-    marginTop: -4,
+    marginTop: 4,
+  },
+  actions: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  cancelButton: {
+    marginRight: 8,
+  },
+  submitButton: {
+    minWidth: 100,
   },
   modalOverlay: {
     flex: 1,
@@ -430,6 +491,9 @@ const styles = StyleSheet.create({
   },
   listItemText: {
     color: AppColors.textPrimary,
+  },
+  listItemDescription: {
+    color: AppColors.textSecondary,
   },
   divider: {
     backgroundColor: AppColors.divider,

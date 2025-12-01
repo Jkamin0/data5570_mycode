@@ -22,10 +22,14 @@ function RootLayoutNav() {
     if (!initialCheckDone) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inLandingGroup = segments[0] === '(landing)';
+    const inAppGroup = segments[0] === '(app)';
 
-    if (!isAuthenticated && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } else if (isAuthenticated && inAuthGroup) {
+    if (!isAuthenticated && inAppGroup) {
+      router.replace('/(landing)');
+    } else if (!isAuthenticated && segments.length === 0) {
+      router.replace('/(landing)');
+    } else if (isAuthenticated && (inAuthGroup || inLandingGroup)) {
       router.replace('/(app)');
     }
   }, [isAuthenticated, initialCheckDone, segments, router]);

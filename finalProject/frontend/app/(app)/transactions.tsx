@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
-import { Text, FAB, ActivityIndicator, Snackbar } from 'react-native-paper';
+import { View, StyleSheet, FlatList, RefreshControl, Platform } from 'react-native';
+import { Text, FAB, ActivityIndicator, Snackbar, Card } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   fetchTransactions,
@@ -14,7 +15,7 @@ import { errorToMessage } from '../../utils/error';
 import TransactionListItem from '../../components/TransactionListItem';
 import CreateTransactionDialog from '../../components/CreateTransactionDialog';
 import type { Transaction, CreateTransactionPayload } from '../../types/models';
-import { AppColors, getTransactionColor } from '../../theme/colors';
+import { AppColors } from '../../theme/colors';
 
 export default function TransactionsScreen() {
   const dispatch = useAppDispatch();
@@ -64,6 +65,7 @@ export default function TransactionsScreen() {
     const result = await dispatch(createTransaction(payload));
     if (createTransaction.fulfilled.match(result)) {
       await Promise.all([
+        dispatch(fetchTransactions()),
         dispatch(fetchAccounts()),
         dispatch(fetchCategoryBalances()),
       ]);
@@ -75,6 +77,7 @@ export default function TransactionsScreen() {
     const result = await dispatch(deleteTransaction(id));
     if (deleteTransaction.fulfilled.match(result)) {
       await Promise.all([
+        dispatch(fetchTransactions()),
         dispatch(fetchAccounts()),
         dispatch(fetchCategoryBalances()),
       ]);
@@ -103,49 +106,121 @@ export default function TransactionsScreen() {
   const renderHeader = () => {
     const { income, expense } = calculateTotals();
     const net = income - expense;
+    const isNetPositive = net >= 0;
 
     return (
-      <View style={styles.summaryCard}>
-        <Text variant="titleSmall" style={styles.summaryLabel}>
-          Transaction Summary
+      <View style={styles.headerContainer}>
+        <Card style={styles.summaryCard} elevation={4}>
+          <Card.Content>
+            <View style={styles.summaryHeader}>
+              <View style={styles.summaryIconCircle}>
+                <MaterialCommunityIcons
+                  name="chart-box"
+                  size={32}
+                  color={AppColors.limeGreen}
+                />
+              </View>
+              <View style={styles.summaryTextContainer}>
+                <Text variant="titleMedium" style={styles.summaryTitle}>
+                  Transaction Summary
+                </Text>
+                <Text variant="bodySmall" style={styles.summarySubtitle}>
+                  Overall financial flow
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.summaryGrid}>
+              <View style={styles.summaryItem}>
+                <View style={styles.summaryItemHeader}>
+                  <MaterialCommunityIcons
+                    name="arrow-down-circle"
+                    size={20}
+                    color={AppColors.positive}
+                  />
+                  <Text variant="labelMedium" style={styles.summaryItemLabel}>
+                    Income
+                  </Text>
+                </View>
+                <Text variant="headlineSmall" style={styles.incomeText}>
+                  +${income.toFixed(2)}
+                </Text>
+              </View>
+
+              <View style={styles.summaryItem}>
+                <View style={styles.summaryItemHeader}>
+                  <MaterialCommunityIcons
+                    name="arrow-up-circle"
+                    size={20}
+                    color={AppColors.negative}
+                  />
+                  <Text variant="labelMedium" style={styles.summaryItemLabel}>
+                    Expenses
+                  </Text>
+                </View>
+                <Text variant="headlineSmall" style={styles.expenseText}>
+                  -${expense.toFixed(2)}
+                </Text>
+              </View>
+
+              <View style={[styles.summaryItem, styles.netItem]}>
+                <View style={styles.summaryItemHeader}>
+                  <MaterialCommunityIcons
+                    name="equal"
+                    size={20}
+                    color={isNetPositive ? AppColors.positive : AppColors.negative}
+                  />
+                  <Text variant="labelMedium" style={styles.summaryItemLabel}>
+                    Net Flow
+                  </Text>
+                </View>
+                <Text
+                  variant="headlineMedium"
+                  style={[
+                    styles.netText,
+                    { color: isNetPositive ? AppColors.positive : AppColors.negative },
+                  ]}
+                >
+                  {isNetPositive ? '+' : ''}${net.toFixed(2)}
+                </Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          Recent Transactions
         </Text>
-        <View style={styles.summaryRow}>
-          <Text variant="bodyMedium" style={styles.summaryText}>Income</Text>
-          <Text variant="titleMedium" style={styles.incomeText}>
-            ${income.toFixed(2)}
-          </Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text variant="bodyMedium" style={styles.summaryText}>Expenses</Text>
-          <Text variant="titleMedium" style={styles.expenseText}>
-            -${expense.toFixed(2)}
-          </Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text variant="bodyMedium" style={styles.summaryText}>Net</Text>
-          <Text
-            variant="titleMedium"
-            style={[styles.netText, { color: net >= 0 ? AppColors.positive : AppColors.negative }]}
-          >
-            ${net.toFixed(2)}
-          </Text>
-        </View>
       </View>
     );
   };
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
+      <View style={styles.emptyIconContainer}>
+        <MaterialCommunityIcons
+          name="receipt-text-outline"
+          size={64}
+          color={AppColors.textLight}
+        />
+      </View>
       <Text variant="headlineSmall" style={styles.emptyTitle}>
         No Transactions Yet
       </Text>
       <Text variant="bodyMedium" style={styles.emptyDescription}>
-        Tap + to add your first transaction
+        Tap the + button to add your first transaction and start tracking your finances
       </Text>
       {accounts.length === 0 && (
-        <Text variant="bodySmall" style={styles.emptyHint}>
-          Add an account first to log spending or income.
-        </Text>
+        <View style={styles.emptyHintContainer}>
+          <MaterialCommunityIcons
+            name="information-outline"
+            size={16}
+            color={AppColors.textLight}
+          />
+          <Text variant="bodySmall" style={styles.emptyHint}>
+            Create an account first to log spending or income
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -169,8 +244,14 @@ export default function TransactionsScreen() {
         ListHeaderComponent={transactions.length > 0 ? renderHeader : null}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[AppColors.primary]}
+            tintColor={AppColors.primary}
+          />
         }
+        showsVerticalScrollIndicator={Platform.OS === 'web'}
       />
 
       <FAB
@@ -179,6 +260,7 @@ export default function TransactionsScreen() {
         onPress={handleOpenDialog}
         label="Add Transaction"
         disabled={accounts.length === 0}
+        color={AppColors.textOnPrimary}
       />
 
       <CreateTransactionDialog
@@ -204,6 +286,7 @@ export default function TransactionsScreen() {
             dispatch(clearError());
           },
         }}
+        style={styles.snackbar}
       >
         {errorMessage}
       </Snackbar>
@@ -225,62 +308,140 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     color: AppColors.textSecondary,
+    fontSize: 16,
   },
-  listContent: {
-    padding: 16,
-    paddingBottom: 80,
-  },
-  summaryCard: {
-    backgroundColor: AppColors.surface,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 2,
-  },
-  summaryLabel: {
-    color: AppColors.textSecondary,
+  headerContainer: {
     marginBottom: 8,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
+  summaryCard: {
+    marginBottom: 20,
+    backgroundColor: AppColors.surfaceElevated,
+    borderRadius: 16,
   },
-  summaryText: {
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  summaryIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${AppColors.limeGreen}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  summaryTextContainer: {
+    flex: 1,
+  },
+  summaryTitle: {
+    marginBottom: 4,
     color: AppColors.textPrimary,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  summarySubtitle: {
+    color: AppColors.textSecondary,
+  },
+  summaryGrid: {
+    gap: 12,
+  },
+  summaryItem: {
+    backgroundColor: AppColors.surface,
+    borderRadius: 12,
+    padding: 16,
+  },
+  summaryItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  summaryItemLabel: {
+    color: AppColors.textSecondary,
+    fontWeight: '600',
   },
   incomeText: {
     color: AppColors.positive,
     fontWeight: '700',
+    letterSpacing: -0.5,
   },
   expenseText: {
     color: AppColors.negative,
     fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  netItem: {
+    backgroundColor: AppColors.surfaceVariant,
   },
   netText: {
     fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+    color: AppColors.textPrimary,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  listContent: {
+    padding: 16,
+    paddingBottom: 88,
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: AppColors.surfaceVariant,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   emptyTitle: {
     marginBottom: 12,
     color: AppColors.textSecondary,
+    fontWeight: '700',
   },
   emptyDescription: {
     color: AppColors.textLight,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  emptyHintContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    backgroundColor: AppColors.surfaceVariant,
+    borderRadius: 8,
+    marginTop: 8,
   },
   emptyHint: {
-    color: AppColors.textSecondary,
-    marginTop: 8,
+    color: AppColors.textLight,
+    flex: 1,
   },
   fab: {
     position: 'absolute',
     margin: 16,
     right: 0,
     bottom: 0,
+    backgroundColor: AppColors.primary,
+    borderRadius: 28,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  snackbar: {
+    backgroundColor: AppColors.surfaceElevated,
   },
 });

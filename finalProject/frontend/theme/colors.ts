@@ -31,8 +31,8 @@ export const AppColors = {
 
   // Budget Health Colors
   healthy: '#94BF36',
-  cautionary: '#F27244',
-  overspent: '#535925',
+  cautionary: '#535925',
+  overspent: '#F27244',
 
   // Chart Colors (adjusted for dark mode visibility)
   chartPrimary: '#BBF244',
