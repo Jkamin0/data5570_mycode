@@ -18,6 +18,7 @@ import type {
   TransactionType,
   CreateTransactionPayload,
 } from '../types/models';
+import { AppColors } from '../theme/colors';
 
 interface CreateTransactionDialogProps {
   visible: boolean;
@@ -118,13 +119,6 @@ export default function CreateTransactionDialog({
         errors.amount = 'Amount must be a valid number';
       } else if (amountNum <= 0) {
         errors.amount = 'Amount must be greater than zero';
-      } else if (formData.transactionType === 'expense' && balances.length > 0) {
-        const available = getCategoryAvailable(formData.categoryId);
-        if (available <= 0) {
-          errors.amount = 'Allocate funds to this category before spending';
-        } else if (amountNum > available) {
-          errors.amount = `Amount exceeds available in category ($${available.toFixed(2)})`;
-        }
       }
     }
 
@@ -175,15 +169,16 @@ export default function CreateTransactionDialog({
                     value: 'expense',
                     label: 'Expense',
                     icon: 'minus-circle',
+                    disabled: submitting,
                   },
                   {
                     value: 'income',
                     label: 'Income',
                     icon: 'plus-circle',
+                    disabled: submitting,
                   },
                 ]}
                 style={styles.segmentedButtons}
-                disabled={submitting}
               />
 
               <Pressable onPress={() => !submitting && setAccountMenuVisible(true)}>
@@ -357,7 +352,7 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 4,
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   segmentedButtons: {
     marginBottom: 16,
@@ -366,20 +361,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   helperText: {
-    color: '#666',
+    color: AppColors.textSecondary,
     fontSize: 12,
     marginTop: -4,
     textAlign: 'right',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: AppColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   pickerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: AppColors.surface,
     borderRadius: 8,
     width: '100%',
     maxWidth: 400,
@@ -394,6 +389,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     padding: 16,
+    color: AppColors.textPrimary,
   },
   pickerScroll: {
     maxHeight: 320,

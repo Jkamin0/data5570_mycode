@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { clearError, loginUser } from '../../store/slices/authSlice';
 import { errorToMessage } from '../../utils/error';
+import { AppColors } from '../../theme/colors';
 
 type LoginForm = {
   username: string;
@@ -92,7 +93,10 @@ export default function LoginScreen() {
           Login
         </Button>
 
-        <Button onPress={() => router.push('/(auth)/register')}>
+        <Button
+          onPress={() => router.push('/(auth)/register')}
+          textColor={AppColors.oliveGreen}
+        >
           Don't have an account? Register
         </Button>
       </Surface>
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppColors.background,
   },
   surface: {
     padding: 24,
@@ -114,6 +118,7 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 24,
     textAlign: 'center',
+    color: AppColors.textPrimary,
   },
   input: {
     marginBottom: 8,
@@ -123,7 +128,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   error: {
-    color: '#d32f2f',
+    color: AppColors.coral,
     marginTop: 8,
     marginBottom: 8,
     textAlign: 'center',

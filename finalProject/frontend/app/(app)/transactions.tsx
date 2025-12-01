@@ -14,6 +14,7 @@ import { errorToMessage } from '../../utils/error';
 import TransactionListItem from '../../components/TransactionListItem';
 import CreateTransactionDialog from '../../components/CreateTransactionDialog';
 import type { Transaction, CreateTransactionPayload } from '../../types/models';
+import { AppColors, getTransactionColor } from '../../theme/colors';
 
 export default function TransactionsScreen() {
   const dispatch = useAppDispatch();
@@ -109,22 +110,22 @@ export default function TransactionsScreen() {
           Transaction Summary
         </Text>
         <View style={styles.summaryRow}>
-          <Text variant="bodyMedium">Income</Text>
+          <Text variant="bodyMedium" style={styles.summaryText}>Income</Text>
           <Text variant="titleMedium" style={styles.incomeText}>
             ${income.toFixed(2)}
           </Text>
         </View>
         <View style={styles.summaryRow}>
-          <Text variant="bodyMedium">Expenses</Text>
+          <Text variant="bodyMedium" style={styles.summaryText}>Expenses</Text>
           <Text variant="titleMedium" style={styles.expenseText}>
             -${expense.toFixed(2)}
           </Text>
         </View>
         <View style={styles.summaryRow}>
-          <Text variant="bodyMedium">Net</Text>
+          <Text variant="bodyMedium" style={styles.summaryText}>Net</Text>
           <Text
             variant="titleMedium"
-            style={[styles.netText, { color: net >= 0 ? '#4CAF50' : '#F44336' }]}
+            style={[styles.netText, { color: net >= 0 ? AppColors.positive : AppColors.negative }]}
           >
             ${net.toFixed(2)}
           </Text>
@@ -152,7 +153,7 @@ export default function TransactionsScreen() {
   if (loading && transactions.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={AppColors.primary} />
         <Text style={styles.loadingText}>Loading transactions...</Text>
       </View>
     );
@@ -213,31 +214,31 @@ export default function TransactionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppColors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppColors.background,
   },
   loadingText: {
     marginTop: 16,
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   listContent: {
     padding: 16,
     paddingBottom: 80,
   },
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: AppColors.surface,
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
     elevation: 2,
   },
   summaryLabel: {
-    color: '#666',
+    color: AppColors.textSecondary,
     marginBottom: 8,
   },
   summaryRow: {
@@ -246,12 +247,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
+  summaryText: {
+    color: AppColors.textPrimary,
+  },
   incomeText: {
-    color: '#4CAF50',
+    color: AppColors.positive,
     fontWeight: '700',
   },
   expenseText: {
-    color: '#F44336',
+    color: AppColors.negative,
     fontWeight: '700',
   },
   netText: {
@@ -264,13 +268,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     marginBottom: 12,
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   emptyDescription: {
-    color: '#999',
+    color: AppColors.textLight,
   },
   emptyHint: {
-    color: '#777',
+    color: AppColors.textSecondary,
     marginTop: 8,
   },
   fab: {
@@ -278,6 +282,5 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: '#6200ee',
   },
 });

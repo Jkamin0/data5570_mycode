@@ -125,3 +125,12 @@ export interface CreateTransactionPayload {
   amount: number | string;
   description?: string;
 }
+
+export interface ChartDataPoint {
+  categoryName: string;
+  allocated: number;
+  spent: number;
+  available: number;
+  spentPercentage: number;
+  healthColor: string;
+}

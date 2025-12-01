@@ -7,6 +7,7 @@ import { fetchCategoryBalances } from '../../store/slices/categoriesSlice';
 import { errorToMessage } from '../../utils/error';
 import CreateAccountDialog from '../../components/CreateAccountDialog';
 import type { Account } from '../../types/models';
+import { AppColors } from '../../theme/colors';
 
 export default function AccountsScreen() {
   const dispatch = useAppDispatch();
@@ -69,7 +70,6 @@ export default function AccountsScreen() {
       (sum, bal) => sum + parseFloat(bal.spent || '0'),
       0,
     );
-    // To-budget mirrors YNAB: cash - allocated + spent.
     return totalAccountBalance - totalAllocated + totalSpent;
   };
 
@@ -105,7 +105,7 @@ export default function AccountsScreen() {
   if (loading && accounts.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={AppColors.primary} />
         <Text style={styles.loadingText}>Loading accounts...</Text>
       </View>
     );
@@ -174,22 +174,22 @@ export default function AccountsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppColors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppColors.background,
   },
   loadingText: {
     marginTop: 16,
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   totalCard: {
     margin: 16,
     marginBottom: 8,
-    backgroundColor: '#6200ee',
+    backgroundColor: AppColors.oliveGreen,
   },
   totalLabel: {
     color: '#fff',
@@ -215,13 +215,14 @@ const styles = StyleSheet.create({
   },
   accountName: {
     flex: 1,
+    color: AppColors.textPrimary,
   },
   accountBalance: {
     fontWeight: 'bold',
-    color: '#6200ee',
+    color: AppColors.primary,
   },
   accountDate: {
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -230,16 +231,15 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     marginBottom: 12,
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   emptyDescription: {
-    color: '#999',
+    color: AppColors.textLight,
   },
   fab: {
     position: 'absolute',
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: '#6200ee',
   },
 });

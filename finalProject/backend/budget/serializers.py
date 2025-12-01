@@ -50,10 +50,29 @@ class BudgetAllocationSerializer(serializers.ModelSerializer):
         if amount <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
 
-        if account.balance < amount:
-            raise serializers.ValidationError(
-                f"Insufficient funds in account. Available: ${account.balance}, Requested: ${amount}"
-            )
+        # Calculate Available to Budget (total account balance - total allocated + total spent)
+        if user:
+            total_account_balance = Account.objects.filter(user=user).aggregate(
+                total=Sum('balance')
+            )['total'] or Decimal('0')
+
+            total_allocated = BudgetAllocation.objects.filter(
+                account__user=user
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+            total_spent = Transaction.objects.filter(
+                user=user,
+                transaction_type='expense'
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+            available_to_budget = total_account_balance - total_allocated + total_spent
+
+            if amount > available_to_budget:
+                available_display = format(available_to_budget, '.2f')
+                amount_display = format(amount, '.2f')
+                raise serializers.ValidationError(
+                    f"Insufficient available budget. Available: ${available_display}, Requested: ${amount_display}"
+                )
 
         return data
 
@@ -92,23 +111,6 @@ class TransactionSerializer(serializers.ModelSerializer):
 
             if user and category.user != user:
                 raise serializers.ValidationError("Category does not belong to the authenticated user.")
-
-            allocated = BudgetAllocation.objects.filter(
-                category=category,
-            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
-
-            spent = Transaction.objects.filter(
-                category=category,
-                transaction_type='expense'
-            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
-
-            available = allocated - spent
-            if amount > available:
-                available_display = format(available, '.2f')
-                amount_display = format(amount, '.2f')
-                raise serializers.ValidationError(
-                    f"Insufficient available funds in category. Available: ${available_display}, Requested: ${amount_display}"
-                )
         elif transaction_type == 'income' and category is not None and user and category.user != user:
             raise serializers.ValidationError("Category does not belong to the authenticated user.")
 

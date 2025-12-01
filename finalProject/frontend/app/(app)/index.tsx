@@ -1,11 +1,12 @@
-import { View, StyleSheet } from 'react-native';
-import { Button, Card, Text } from 'react-native-paper';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { FAB, Card, Text } from 'react-native-paper';
+import { useAppDispatch } from '../../store/hooks';
 import { logoutUser } from '../../store/slices/authSlice';
+import BudgetHealthDashboard from '../../components/BudgetHealthDashboard';
+import { AppColors } from '../../theme/colors';
 
 export default function DashboardScreen() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -13,28 +14,28 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text variant="headlineMedium" style={styles.title}>
-            Welcome to Your Budget App
-          </Text>
-          <Text variant="bodyLarge" style={styles.subtitle}>
-            Hello, {user?.username}!
-          </Text>
-          <Text variant="bodyMedium" style={styles.description}>
-            Your authentication flow is complete. You can now build out the rest of your budgeting features.
-          </Text>
-        </Card.Content>
-      </Card>
+      <ScrollView style={styles.scrollView}>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text variant="headlineMedium" style={styles.title}>
+              Budget Health Dashboard
+            </Text>
+            <Text variant="bodyMedium" style={styles.subtitle}>
+              Track your spending across categories
+            </Text>
+          </Card.Content>
+        </Card>
 
-      <Button
-        mode="contained"
-        onPress={handleLogout}
-        style={styles.logoutButton}
+        <BudgetHealthDashboard />
+      </ScrollView>
+
+      <FAB
         icon="logout"
-      >
-        Logout
-      </Button>
+        onPress={handleLogout}
+        style={styles.logoutFab}
+        color="#fff"
+        customSize={56}
+      />
     </View>
   );
 }
@@ -42,8 +43,11 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: AppColors.background,
+  },
+  scrollView: {
+    flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   card: {
     marginTop: 16,
@@ -51,18 +55,18 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 16,
     textAlign: 'center',
+    color: AppColors.textPrimary,
   },
   subtitle: {
     marginBottom: 8,
     textAlign: 'center',
-    color: '#6200ee',
+    color: AppColors.oliveGreen,
+    fontWeight: '600',
   },
-  description: {
-    marginTop: 16,
-    textAlign: 'center',
-    color: '#666',
-  },
-  logoutButton: {
-    marginTop: 24,
+  logoutFab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
+    backgroundColor: AppColors.coral,
   },
 });

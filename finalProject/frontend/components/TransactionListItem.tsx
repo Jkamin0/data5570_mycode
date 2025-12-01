@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Card, Text, IconButton, Dialog, Portal, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Transaction } from '../types/models';
+import { AppColors, getTransactionColor } from '../theme/colors';
 
 interface TransactionListItemProps {
   transaction: Transaction;
@@ -26,7 +27,7 @@ export default function TransactionListItem({
   };
 
   const getAmountColor = (): string => {
-    return transaction.transaction_type === 'income' ? '#4CAF50' : '#F44336';
+    return getTransactionColor(transaction.transaction_type);
   };
 
   const getIconName = (): 'plus-circle' | 'minus-circle' => {
@@ -34,7 +35,7 @@ export default function TransactionListItem({
   };
 
   const getIconColor = (): string => {
-    return transaction.transaction_type === 'income' ? '#4CAF50' : '#F44336';
+    return getTransactionColor(transaction.transaction_type);
   };
 
   const handleDelete = async () => {
@@ -88,6 +89,7 @@ export default function TransactionListItem({
                 icon="delete"
                 size={20}
                 onPress={() => setDeleteDialogVisible(true)}
+                iconColor={AppColors.coral}
               />
             </View>
           </View>
@@ -95,19 +97,32 @@ export default function TransactionListItem({
       </Card>
 
       <Portal>
-        <Dialog visible={deleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)}>
-          <Dialog.Title>Delete Transaction</Dialog.Title>
+        <Dialog
+          visible={deleteDialogVisible}
+          onDismiss={() => setDeleteDialogVisible(false)}
+          style={styles.dialog}
+        >
+          <Dialog.Title style={styles.dialogTitle}>Delete Transaction</Dialog.Title>
           <Dialog.Content>
-            <Text>
+            <Text style={styles.dialogText}>
               Are you sure you want to delete this transaction? This will reverse the account
               balance change.
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDeleteDialogVisible(false)} disabled={deleting}>
+            <Button
+              onPress={() => setDeleteDialogVisible(false)}
+              disabled={deleting}
+              textColor={AppColors.textSecondary}
+            >
               Cancel
             </Button>
-            <Button onPress={handleDelete} loading={deleting} disabled={deleting}>
+            <Button
+              onPress={handleDelete}
+              loading={deleting}
+              disabled={deleting}
+              textColor={AppColors.coral}
+            >
               Delete
             </Button>
           </Dialog.Actions>
@@ -121,6 +136,7 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
     elevation: 2,
+    backgroundColor: AppColors.surface,
   },
   container: {
     flexDirection: 'row',
@@ -135,16 +151,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   date: {
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   category: {
     fontWeight: '600',
+    color: AppColors.textPrimary,
   },
   account: {
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   description: {
-    color: '#666',
+    color: AppColors.textSecondary,
     fontStyle: 'italic',
   },
   rightSection: {
@@ -154,5 +171,14 @@ const styles = StyleSheet.create({
   amount: {
     fontWeight: '700',
     marginBottom: 4,
+  },
+  dialog: {
+    backgroundColor: AppColors.dialogBackground,
+  },
+  dialogTitle: {
+    color: AppColors.textPrimary,
+  },
+  dialogText: {
+    color: AppColors.textSecondary,
   },
 });

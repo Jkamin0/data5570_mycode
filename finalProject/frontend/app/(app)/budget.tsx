@@ -32,6 +32,7 @@ import MoveMoneyDialog from '../../components/MoveMoneyDialog';
 import CategoryListItem from '../../components/CategoryListItem';
 import { errorToMessage } from '../../utils/error';
 import type { Category, MoveMoneyPayload } from '../../types/models';
+import { AppColors } from '../../theme/colors';
 
 export default function BudgetScreen() {
   const dispatch = useAppDispatch();
@@ -90,7 +91,6 @@ export default function BudgetScreen() {
       (sum, bal) => sum + parseFloat(bal.spent || '0'),
       0,
     );
-    // To-budget mirrors YNAB: cash - allocated + spent (spending shouldn't drop to-budget).
     return totalAccountBalance - totalAllocated + totalSpent;
   };
 
@@ -186,7 +186,7 @@ export default function BudgetScreen() {
     if (loading && categories.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <ActivityIndicator size="large" color="#6200ee" />
+          <ActivityIndicator size="large" color={AppColors.primary} />
           <Text style={styles.emptyText}>Loading categories...</Text>
         </View>
       );
@@ -276,6 +276,7 @@ export default function BudgetScreen() {
         categories={categories}
         accounts={accounts}
         preselectedCategoryId={selectedCategoryForAllocation}
+        availableToBudget={calculateAvailableToBudget()}
       />
 
       <MoveMoneyDialog
@@ -306,11 +307,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppColors.background,
   },
   summaryCard: {
     marginBottom: 16,
-    backgroundColor: '#6200ee',
+    backgroundColor: AppColors.oliveGreen,
     elevation: 4,
   },
   summaryLabel: {
@@ -340,18 +341,17 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: '#666',
+    color: AppColors.textSecondary,
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
+    color: AppColors.textLight,
     marginTop: 8,
   },
   fab: {
     position: 'absolute',
     right: 16,
     bottom: 16,
-    backgroundColor: '#6200ee',
   },
 });

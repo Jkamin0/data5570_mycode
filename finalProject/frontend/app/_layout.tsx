@@ -6,6 +6,7 @@ import LoadingScreen from '../components/LoadingScreen';
 import store from '../store';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { checkAuthStatus } from '../store/slices/authSlice';
+import { customTheme } from '../theme/theme';
 
 function RootLayoutNav() {
   const dispatch = useAppDispatch();
@@ -39,7 +40,7 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <ReduxProvider store={store}>
-      <PaperProvider>
+      <PaperProvider theme={customTheme}>
         <RootLayoutNav />
       </PaperProvider>
     </ReduxProvider>

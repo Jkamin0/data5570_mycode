@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { clearError, registerUser } from '../../store/slices/authSlice';
 import type { RegisterPayload } from '../../types/models';
 import { errorToMessage } from '../../utils/error';
+import { AppColors } from '../../theme/colors';
 
 type ValidationErrors = Partial<Record<keyof RegisterPayload, string>>;
 
@@ -138,7 +139,7 @@ export default function RegisterScreen() {
         {validationErrors.password ? (
           <HelperText type="error">{validationErrors.password}</HelperText>
         ) : (
-          <HelperText type="info">
+          <HelperText type="info" style={styles.helperText}>
             At least 8 characters, not too similar to your username, and not a common password
           </HelperText>
         )}
@@ -181,7 +182,10 @@ export default function RegisterScreen() {
           Register
         </Button>
 
-        <Button onPress={() => router.back()}>
+        <Button
+          onPress={() => router.back()}
+          textColor={AppColors.oliveGreen}
+        >
           Already have an account? Login
         </Button>
       </Surface>
@@ -194,7 +198,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppColors.background,
   },
   surface: {
     padding: 24,
@@ -203,16 +207,20 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 24,
     textAlign: 'center',
+    color: AppColors.textPrimary,
   },
   input: {
     marginBottom: 8,
+  },
+  helperText: {
+    color: AppColors.textSecondary,
   },
   button: {
     marginTop: 16,
     marginBottom: 8,
   },
   error: {
-    color: '#d32f2f',
+    color: AppColors.coral,
     marginTop: 8,
     marginBottom: 8,
     textAlign: 'center',

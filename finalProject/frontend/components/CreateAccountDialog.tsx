@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Dialog, Portal, TextInput, Button, HelperText } from 'react-native-paper';
+import { AppColors } from '../theme/colors';
 
 interface CreateAccountDialogProps {
   visible: boolean;
@@ -73,8 +74,8 @@ export default function CreateAccountDialog({
 
   return (
     <Portal>
-      <Dialog visible={visible} onDismiss={handleClose}>
-        <Dialog.Title>Create New Account</Dialog.Title>
+      <Dialog visible={visible} onDismiss={handleClose} style={styles.dialog}>
+        <Dialog.Title style={styles.title}>Create New Account</Dialog.Title>
         <Dialog.Content>
           <View style={styles.form}>
             <TextInput
@@ -85,6 +86,11 @@ export default function CreateAccountDialog({
               disabled={submitting}
               style={styles.input}
               placeholder="e.g., Checking Account"
+              mode="outlined"
+              outlineColor={AppColors.border}
+              activeOutlineColor={AppColors.primary}
+              textColor={AppColors.textPrimary}
+              placeholderTextColor={AppColors.textLight}
             />
             {validationErrors.name && (
               <HelperText type="error">{validationErrors.name}</HelperText>
@@ -99,7 +105,12 @@ export default function CreateAccountDialog({
               keyboardType="decimal-pad"
               style={styles.input}
               placeholder="0.00"
-              left={<TextInput.Affix text="$" />}
+              mode="outlined"
+              outlineColor={AppColors.border}
+              activeOutlineColor={AppColors.primary}
+              textColor={AppColors.textPrimary}
+              placeholderTextColor={AppColors.textLight}
+              left={<TextInput.Affix text="$" textStyle={{ color: AppColors.textSecondary }} />}
             />
             {validationErrors.balance && (
               <HelperText type="error">{validationErrors.balance}</HelperText>
@@ -107,7 +118,7 @@ export default function CreateAccountDialog({
           </View>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={handleClose} disabled={submitting}>
+          <Button onPress={handleClose} disabled={submitting} textColor={AppColors.textSecondary}>
             Cancel
           </Button>
           <Button onPress={handleSubmit} loading={submitting} disabled={submitting}>
@@ -120,10 +131,17 @@ export default function CreateAccountDialog({
 }
 
 const styles = StyleSheet.create({
+  dialog: {
+    backgroundColor: AppColors.dialogBackground,
+  },
+  title: {
+    color: AppColors.textPrimary,
+  },
   form: {
     gap: 8,
   },
   input: {
     marginBottom: 8,
+    backgroundColor: AppColors.inputBackground,
   },
 });

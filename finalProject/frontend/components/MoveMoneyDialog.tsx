@@ -11,6 +11,7 @@ import {
   Divider,
 } from 'react-native-paper';
 import type { Account, Category, CategoryBalance, MoveMoneyPayload } from '../types/models';
+import { AppColors, getAvailableColor } from '../theme/colors';
 
 interface MoveMoneyDialogProps {
   visible: boolean;
@@ -141,17 +142,15 @@ export default function MoveMoneyDialog({
     return `${category.name} ($${parseFloat(balance.available).toFixed(2)} available)`;
   };
 
-  const getAvailableColor = (available: string): string => {
+  const getAvailableColorForDisplay = (available: string): string => {
     const availableNum = parseFloat(available);
-    if (availableNum > 0) return '#4CAF50';
-    if (availableNum < 0) return '#F44336';
-    return '#999';
+    return getAvailableColor(availableNum);
   };
 
   return (
     <Portal>
-      <Dialog visible={visible} onDismiss={handleClose}>
-        <Dialog.Title>Move Money</Dialog.Title>
+      <Dialog visible={visible} onDismiss={handleClose} style={styles.dialog}>
+        <Dialog.Title style={styles.title}>Move Money</Dialog.Title>
         <Dialog.ScrollArea>
           <ScrollView>
             <View style={styles.form}>
@@ -163,6 +162,11 @@ export default function MoveMoneyDialog({
                   disabled={submitting}
                   style={styles.input}
                   placeholder="Select source category"
+                  mode="outlined"
+                  outlineColor={AppColors.border}
+                  activeOutlineColor={AppColors.primary}
+                  textColor={AppColors.textPrimary}
+                  placeholderTextColor={AppColors.textLight}
                   right={<TextInput.Icon icon="menu-down" />}
                   editable={false}
                   pointerEvents="none"
@@ -180,6 +184,11 @@ export default function MoveMoneyDialog({
                   disabled={submitting}
                   style={styles.input}
                   placeholder="Select target category"
+                  mode="outlined"
+                  outlineColor={AppColors.border}
+                  activeOutlineColor={AppColors.primary}
+                  textColor={AppColors.textPrimary}
+                  placeholderTextColor={AppColors.textLight}
                   right={<TextInput.Icon icon="menu-down" />}
                   editable={false}
                   pointerEvents="none"
@@ -197,6 +206,11 @@ export default function MoveMoneyDialog({
                   disabled={submitting}
                   style={styles.input}
                   placeholder="Select account"
+                  mode="outlined"
+                  outlineColor={AppColors.border}
+                  activeOutlineColor={AppColors.primary}
+                  textColor={AppColors.textPrimary}
+                  placeholderTextColor={AppColors.textLight}
                   right={<TextInput.Icon icon="menu-down" />}
                   editable={false}
                   pointerEvents="none"
@@ -215,7 +229,12 @@ export default function MoveMoneyDialog({
                 keyboardType="decimal-pad"
                 style={styles.input}
                 placeholder="0.00"
-                left={<TextInput.Affix text="$" />}
+                mode="outlined"
+                outlineColor={AppColors.border}
+                activeOutlineColor={AppColors.primary}
+                textColor={AppColors.textPrimary}
+                placeholderTextColor={AppColors.textLight}
+                left={<TextInput.Affix text="$" textStyle={{ color: AppColors.textSecondary }} />}
               />
               {validationErrors.amount && (
                 <HelperText type="error">{validationErrors.amount}</HelperText>
@@ -230,7 +249,7 @@ export default function MoveMoneyDialog({
           </ScrollView>
         </Dialog.ScrollArea>
         <Dialog.Actions>
-          <Button onPress={handleClose} disabled={submitting}>
+          <Button onPress={handleClose} disabled={submitting} textColor={AppColors.textSecondary}>
             Cancel
           </Button>
           <Button onPress={handleSubmit} loading={submitting} disabled={submitting}>
@@ -248,25 +267,25 @@ export default function MoveMoneyDialog({
         <Pressable style={styles.modalOverlay} onPress={() => setSourceMenuVisible(false)}>
           <View style={styles.pickerContainer}>
             <Text style={styles.pickerTitle}>Select Source Category</Text>
-            <Divider />
+            <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {categories.length === 0 ? (
-                <List.Item title="No categories available" disabled />
+                <List.Item title="No categories available" disabled titleStyle={styles.listItemText} />
               ) : (
                 categories.map((category) => {
                   const balance = balances.find((b) => b.category_id === category.id);
-                  const available = balance ? parseFloat(balance.available) : 0;
                   return (
                     <List.Item
                       key={category.id}
                       title={category.name}
+                      titleStyle={styles.listItemText}
                       description={
                         balance
                           ? `$${parseFloat(balance.available).toFixed(2)} available`
                           : 'No balance info'
                       }
                       descriptionStyle={{
-                        color: balance ? getAvailableColor(balance.available) : '#999',
+                        color: balance ? getAvailableColorForDisplay(balance.available) : AppColors.textLight,
                       }}
                       onPress={() => {
                         setFormData({ ...formData, sourceCategoryId: category.id });
@@ -292,10 +311,10 @@ export default function MoveMoneyDialog({
         <Pressable style={styles.modalOverlay} onPress={() => setTargetMenuVisible(false)}>
           <View style={styles.pickerContainer}>
             <Text style={styles.pickerTitle}>Select Target Category</Text>
-            <Divider />
+            <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {categories.length === 0 ? (
-                <List.Item title="No categories available" disabled />
+                <List.Item title="No categories available" disabled titleStyle={styles.listItemText} />
               ) : (
                 categories
                   .filter((c) => c.id !== formData.sourceCategoryId)
@@ -303,6 +322,7 @@ export default function MoveMoneyDialog({
                     <List.Item
                       key={category.id}
                       title={category.name}
+                      titleStyle={styles.listItemText}
                       onPress={() => {
                         setFormData({ ...formData, targetCategoryId: category.id });
                         setTargetMenuVisible(false);
@@ -326,15 +346,16 @@ export default function MoveMoneyDialog({
         <Pressable style={styles.modalOverlay} onPress={() => setAccountMenuVisible(false)}>
           <View style={styles.pickerContainer}>
             <Text style={styles.pickerTitle}>Select Account</Text>
-            <Divider />
+            <Divider style={styles.divider} />
             <ScrollView style={styles.pickerScroll}>
               {accounts.length === 0 ? (
-                <List.Item title="No accounts available" disabled />
+                <List.Item title="No accounts available" disabled titleStyle={styles.listItemText} />
               ) : (
                 accounts.map((account) => (
                   <List.Item
                     key={account.id}
                     title={account.name}
+                    titleStyle={styles.listItemText}
                     onPress={() => {
                       setFormData({ ...formData, accountId: account.id });
                       setAccountMenuVisible(false);
@@ -353,6 +374,12 @@ export default function MoveMoneyDialog({
 }
 
 const styles = StyleSheet.create({
+  dialog: {
+    backgroundColor: AppColors.dialogBackground,
+  },
+  title: {
+    color: AppColors.textPrimary,
+  },
   form: {
     gap: 8,
     paddingHorizontal: 24,
@@ -360,21 +387,22 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 8,
+    backgroundColor: AppColors.inputBackground,
   },
   helperText: {
-    color: '#666',
+    color: AppColors.textSecondary,
     fontSize: 12,
     marginTop: -4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: AppColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   pickerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: AppColors.surfaceElevated,
     borderRadius: 8,
     width: '100%',
     maxWidth: 400,
@@ -384,17 +412,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: AppColors.border,
   },
   pickerTitle: {
     fontSize: 18,
     fontWeight: '600',
     padding: 16,
+    color: AppColors.textPrimary,
   },
   pickerScroll: {
     maxHeight: 320,
   },
   listItem: {
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: AppColors.divider,
+  },
+  listItemText: {
+    color: AppColors.textPrimary,
+  },
+  divider: {
+    backgroundColor: AppColors.divider,
   },
 });

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Card, Text, IconButton, Dialog, Portal, Button } from 'react-native-paper';
 import type { Category, CategoryBalance } from '../types/models';
+import { AppColors, getAvailableColor } from '../theme/colors';
 
 interface CategoryListItemProps {
   category: Category;
@@ -20,12 +21,10 @@ export default function CategoryListItem({
 }: CategoryListItemProps) {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
-  const getAvailableColor = (available: string | undefined): string => {
-    if (!available) return '#999';
+  const getAvailableColorForDisplay = (available: string | undefined): string => {
+    if (!available) return AppColors.textLight;
     const availableNum = parseFloat(available);
-    if (availableNum > 0) return '#4CAF50';
-    if (availableNum < 0) return '#F44336';
-    return '#999';
+    return getAvailableColor(availableNum);
   };
 
   const handleDelete = () => {
@@ -43,13 +42,19 @@ export default function CategoryListItem({
             <Text style={styles.categoryName}>{category.name}</Text>
             <View style={styles.actions}>
               {onEdit && (
-                <IconButton icon="pencil" size={20} onPress={() => onEdit(category)} />
+                <IconButton
+                  icon="pencil"
+                  size={20}
+                  onPress={() => onEdit(category)}
+                  iconColor={AppColors.oliveGreen}
+                />
               )}
               {onDelete && (
                 <IconButton
                   icon="delete"
                   size={20}
                   onPress={() => setDeleteDialogVisible(true)}
+                  iconColor={AppColors.coral}
                 />
               )}
             </View>
@@ -71,7 +76,7 @@ export default function CategoryListItem({
                   style={[
                     styles.balanceValue,
                     styles.availableValue,
-                    { color: getAvailableColor(balance.available) },
+                    { color: getAvailableColorForDisplay(balance.available) },
                   ]}
                 >
                   ${balance.available}
@@ -85,16 +90,24 @@ export default function CategoryListItem({
       </Card>
 
       <Portal>
-        <Dialog visible={deleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)}>
-          <Dialog.Title>Delete Category</Dialog.Title>
+        <Dialog
+          visible={deleteDialogVisible}
+          onDismiss={() => setDeleteDialogVisible(false)}
+          style={styles.dialog}
+        >
+          <Dialog.Title style={styles.dialogTitle}>Delete Category</Dialog.Title>
           <Dialog.Content>
-            <Text>
+            <Text style={styles.dialogText}>
               Are you sure you want to delete "{category.name}"? This action cannot be undone.
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDeleteDialogVisible(false)}>Cancel</Button>
-            <Button onPress={handleDelete}>Delete</Button>
+            <Button onPress={() => setDeleteDialogVisible(false)} textColor={AppColors.textSecondary}>
+              Cancel
+            </Button>
+            <Button onPress={handleDelete} textColor={AppColors.coral}>
+              Delete
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -106,6 +119,7 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
     elevation: 2,
+    backgroundColor: AppColors.surface,
   },
   header: {
     flexDirection: 'row',
@@ -117,6 +131,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     flex: 1,
+    color: AppColors.textPrimary,
   },
   actions: {
     flexDirection: 'row',
@@ -132,11 +147,12 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 14,
-    color: '#666',
+    color: AppColors.textSecondary,
   },
   balanceValue: {
     fontSize: 14,
     fontWeight: '500',
+    color: AppColors.textPrimary,
   },
   availableValue: {
     fontWeight: '700',
@@ -144,7 +160,16 @@ const styles = StyleSheet.create({
   },
   calculating: {
     fontSize: 14,
-    color: '#999',
+    color: AppColors.textLight,
     fontStyle: 'italic',
+  },
+  dialog: {
+    backgroundColor: AppColors.dialogBackground,
+  },
+  dialogTitle: {
+    color: AppColors.textPrimary,
+  },
+  dialogText: {
+    color: AppColors.textSecondary,
   },
 });

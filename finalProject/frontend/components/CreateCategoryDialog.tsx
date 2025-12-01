@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Dialog, Portal, TextInput, Button, HelperText } from 'react-native-paper';
+import { AppColors } from '../theme/colors';
 
 interface CreateCategoryDialogProps {
   visible: boolean;
@@ -65,8 +66,10 @@ export default function CreateCategoryDialog({
 
   return (
     <Portal>
-      <Dialog visible={visible} onDismiss={handleClose}>
-        <Dialog.Title>{mode === 'edit' ? 'Edit Category' : 'Create New Category'}</Dialog.Title>
+      <Dialog visible={visible} onDismiss={handleClose} style={styles.dialog}>
+        <Dialog.Title style={styles.title}>
+          {mode === 'edit' ? 'Edit Category' : 'Create New Category'}
+        </Dialog.Title>
         <Dialog.Content>
           <View style={styles.form}>
             <TextInput
@@ -77,6 +80,11 @@ export default function CreateCategoryDialog({
               disabled={submitting}
               style={styles.input}
               placeholder="e.g., Groceries, Rent, Entertainment"
+              mode="outlined"
+              outlineColor={AppColors.border}
+              activeOutlineColor={AppColors.primary}
+              textColor={AppColors.textPrimary}
+              placeholderTextColor={AppColors.textLight}
             />
             {validationErrors.name && (
               <HelperText type="error">{validationErrors.name}</HelperText>
@@ -84,7 +92,7 @@ export default function CreateCategoryDialog({
           </View>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={handleClose} disabled={submitting}>
+          <Button onPress={handleClose} disabled={submitting} textColor={AppColors.textSecondary}>
             Cancel
           </Button>
           <Button onPress={handleSubmit} loading={submitting} disabled={submitting}>
@@ -97,10 +105,17 @@ export default function CreateCategoryDialog({
 }
 
 const styles = StyleSheet.create({
+  dialog: {
+    backgroundColor: AppColors.dialogBackground,
+  },
+  title: {
+    color: AppColors.textPrimary,
+  },
   form: {
     gap: 8,
   },
   input: {
     marginBottom: 8,
+    backgroundColor: AppColors.inputBackground,
   },
 });
